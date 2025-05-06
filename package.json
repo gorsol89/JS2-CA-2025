@@ -1,31 +1,15 @@
 {
-  "name": "js2-ca-2025",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gorsol89/JS2-CA-2025.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/gorsol89/JS2-CA-2025/issues"
-  },
-  "homepage": "https://github.com/gorsol89/JS2-CA-2025#readme",
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.5",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.3",
+    "vite": "^6.3.5",
     "tailwindcss": "^4.1.5",
-    "vite": "^6.3.5"
+    "postcss": "^8.5.3",
+    "autoprefixer": "^10.4.21",
+    "@tailwindcss/postcss": "^1.0.0"
   }
 }

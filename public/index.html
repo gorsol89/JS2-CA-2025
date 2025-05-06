@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FuzzyGallery | Login</title>
+</head>
+<body class="flex flex-col min-h-screen bg-[#F3EAD1]">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-[#A2EBC0]">
+    <div class="h-40 flex items-center justify-center">
+      <a href="/" class="flex items-center space-x-4">
+        <img 
+          src="/logo.png" 
+          alt="FuzzyGallery Logo" 
+          class="h-32 w-auto" 
+          title="FuzzyGallery – share cute animal photos" 
+        />
+        <span class="text-3xl font-bold text-[#5A3E28]">
+          FuzzyGallery
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main: Login Form -->
+  <main class="flex-grow flex items-center justify-center p-4">
+    <form id="loginForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4">
+      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">Log In</h2>
+      <input
+        id="email"
+        type="email"
+        placeholder="Email"
+        required
+        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
+      />
+      <input
+        id="password"
+        type="password"
+        placeholder="Password"
+        required
+        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
+      />
+      <button
+        type="submit"
+        class="w-full bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 rounded-lg font-semibold transition-colors"
+      >
+        Log In
+      </button>
+      <p class="text-center text-sm text-[#5A3E28]">
+        Don’t have an account?
+        <a
+          href="/pages/register.html"
+          class="text-[#A8E0FF] hover:text-[#F9D774] font-medium"
+        >
+          Sign up
+        </a>
+      </p>
+    </form>
+  </main>
+
+  <!-- Footer (for reference or testing) -->
+  <footer class="bg-[#A2EBC0] py-6">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-7 gap-4">
+      <div class="p-4 bg-[#F9A8B8] text-black text-center rounded">#F9A8B8</div>
+      <div class="p-4 bg-[#A8E0FF] text-black text-center rounded">#A8E0FF</div>
+      <div class="p-4 bg-[#A2EBC0] text-black text-center rounded">#A2EBC0</div>
+      <div class="p-4 bg-[#F9D774] text-black text-center rounded">#F9D774</div>
+      <div class="p-4 bg-[#5A3E28] text-black text-center rounded">#5A3E28</div>
+      <div class="p-4 bg-[#F3EAD1] text-black text-center rounded">#F3EAD1</div>
+      <div class="p-4 bg-[#F501E1] text-black text-center rounded">#F501E1</div>
+    </div>
+  </footer>
+
+  <!-- JS Entries -->
+  <script type="module" src="/src/js/main.js"></script>
+  <script type="module" src="/src/js/auth.js"></script>
+</body>
+</html>

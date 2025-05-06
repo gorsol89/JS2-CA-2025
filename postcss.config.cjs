@@ -1,9 +1,8 @@
-// Option A: object-style
+// postcss.config.cjs
 module.exports = {
   plugins: {
-    // ← use the new package name here
+    // Tailwind v4’s PostCSS plugin entrypoint
     '@tailwindcss/postcss': {},
-    // keep autoprefixer as is
     autoprefixer: {},
   },
-}
+};

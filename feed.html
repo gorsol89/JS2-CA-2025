@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FuzzyGallery | Profile</title>
+  <title>FuzzyGallery | Feed</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
 
@@ -17,16 +17,12 @@
     </div>
   </header>
 
-  <!-- Main: Profile Info -->
-  <main class="flex-grow p-4 max-w-3xl mx-auto space-y-6">
-    <section id="profileInfo" class="bg-white p-6 rounded-lg shadow-md">
-      <!-- JS will inject avatar, name, bio, stats, follow button -->
-    </section>
-
-    <section id="profilePosts" class="space-y-4">
-      <h2 class="text-xl font-semibold text-[#5A3E28]">Posts</h2>
-      <!-- JS will inject the user’s posts here -->
-    </section>
+  <!-- Main: Feed -->
+  <main class="flex-grow p-4 space-y-4 max-w-3xl mx-auto">
+    <h2 class="text-2xl font-semibold text-[#5A3E28]">Your Feed</h2>
+    <div id="feedContainer" class="space-y-6">
+      <!-- JS will inject post cards here -->
+    </div>
   </main>
 
   <!-- Sticky Footer -->
@@ -44,6 +40,6 @@
 
   <!-- JS Entries -->
   <script type="module" src="/src/js/main.js"></script>
-  <script type="module" src="/src/js/profile.js"></script>
+  <script type="module" src="/src/js/feed.js"></script>
 </body>
 </html>

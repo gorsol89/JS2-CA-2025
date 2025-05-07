@@ -3,73 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FuzzyGallery | Sign Up</title>
+  <title>FuzzyGallery | New Post</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
 
   <!-- Sticky Header -->
   <header class="sticky top-0 z-50 bg-[#A2EBC0]">
     <div class="h-40 flex items-center justify-center">
-      <a href="index.html" class="flex items-center space-x-4">
-        <img 
-          src="/logo.png" 
-          alt="FuzzyGallery Logo" 
-          class="h-32 w-auto" 
-          title="FuzzyGallery – share cute animal photos" 
-        />
-        <span class="text-3xl font-bold text-[#5A3E28]">
-          FuzzyGallery
-        </span>
+      <a href="feed.html" class="flex items-center space-x-4">
+        <img src="/logo.png" alt="Logo" class="h-32" />
+        <span class="text-3xl font-bold text-[#5A3E28]">FuzzyGallery</span>
       </a>
     </div>
   </header>
 
-  <!-- Main: Register Form -->
+  <!-- Main: Post Form -->
   <main class="flex-grow flex items-center justify-center p-4">
-    <form id="registerForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4">
-      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">Sign Up</h2>
+    <form id="postForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4">
+      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">Create New Post</h2>
       <input
-        id="name"
+        id="postTitle"
         type="text"
-        placeholder="Name"
+        placeholder="Post title"
         required
         class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
       />
       <input
-        id="email"
-        type="email"
-        placeholder="Email"
-        required
-        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
-      />
-      <input
-        id="password"
-        type="password"
-        placeholder="Password"
+        id="postImageUrl"
+        type="url"
+        placeholder="Unsplash image URL"
         required
         class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
       />
       <textarea
-        id="bio"
-        rows="3"
-        placeholder="Short bio"
+        id="postBody"
+        rows="4"
+        placeholder="Say something about your furry friend..."
         class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
       ></textarea>
       <button
         type="submit"
         class="w-full bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 rounded-lg font-semibold transition-colors"
       >
-        Create Account
+        Submit Post
       </button>
-      <p class="text-center text-sm text-[#5A3E28]">
-        Already have an account?
-        <a
-          href="index.html"
-          class="text-[#A8E0FF] hover:text-[#F9D774] font-medium"
-        >
-          Log in
-        </a>
-      </p>
     </form>
   </main>
 
@@ -88,6 +65,6 @@
 
   <!-- JS Entries -->
   <script type="module" src="/src/js/main.js"></script>
-  <script type="module" src="/src/js/auth.js"></script>
+  <script type="module" src="/src/js/post.js"></script>
 </body>
 </html>

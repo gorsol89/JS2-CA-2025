@@ -4,29 +4,90 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="/src/style.css" rel="stylesheet">
-
   <title>FuzzyGallery | Feed</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
-  <header class="sticky top-0 bg-[#A2EBC0]">…</header>
-  <main class="flex-grow flex items-center justify-center p-4">
-    <form id="registerForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4">
-      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">Sign Up</h2>
-      <input id="name"     type="text"  placeholder="Name"  required …/>
-      <input id="email"    type="email" placeholder="Email" required …/>
-      <input id="password" type="password" placeholder="Password" required …/>
-      <textarea id="bio" rows="3" placeholder="Short bio" …></textarea>
-      <input id="avatar" type="url"   placeholder="Avatar URL (Unsplash)" …/>
-      <input id="banner" type="url"   placeholder="Banner URL (Unsplash)" …/>
-      <button type="submit" class="…">Create Account</button>
-      <p class="text-center text-sm">
-        Already have one?
-        <a href="index.html" class="text-[#A8E0FF] hover:text-[#F9D774]">Log in</a>
-      </p>
-    </form>
+  <!-- Header -->
+  <header class="sticky top-0 bg-[#A2EBC0] z-10">
+    <div class="h-40 flex items-center justify-between px-4">
+      <a href="index.html" class="flex items-center space-x-4">
+        <img src="/logo.png" class="h-32" alt="Logo"/>
+        <span class="text-3xl font-bold text-[#5A3E28]">FuzzyGallery</span>
+      </a>
+      <button id="menuBtn" class="md:hidden p-2 text-[#5A3E28]" aria-label="Toggle menu">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <nav class="hidden md:flex space-x-6">
+        <a href="feed.html"    class="text-[#5A3E28] hover:text-[#F9D774]">Feed</a>
+        <a href="profile.html" class="text-[#5A3E28] hover:text-[#F9D774]">Profile</a>
+        <button class="logoutBtn text-[#5A3E28] hover:text-[#F9D774]">Logout</button>
+      </nav>
+    </div>
+    <nav id="mobileMenu" class="md:hidden hidden bg-[#A2EBC0] px-4 pb-4 space-y-2">
+      <a href="feed.html"    class="block text-[#5A3E28] hover:text-[#F9D774]">Feed</a>
+      <a href="profile.html" class="block text-[#5A3E28] hover:text-[#F9D774]">Profile</a>
+      <button class="logoutBtn block w-full text-left text-[#5A3E28] hover:text-[#F9D774]">
+        Logout
+      </button>
+    </nav>
+  </header>
+
+  <main class="flex-grow p-4">
+    <div class="w-full max-w-3xl mx-auto space-y-6">
+      <!-- Current User -->
+      <div id="currentUser" class="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
+        <img id="currentUserAvatar" class="w-10 h-10 rounded-full" src="" alt="Your avatar"/>
+        <span id="currentUserName" class="font-semibold text-lg text-[#5A3E28]"></span>
+      </div>
+
+      <!-- Find Users -->
+      <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+        <h2 class="text-xl font-bold text-[#5A3E28]">Find Users</h2>
+        <form id="searchForm" class="flex space-x-2">
+          <input id="searchInput" type="text" placeholder="Username" required
+                 class="flex-grow p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]" />
+          <button type="submit"
+                  class="bg-[#A8E0FF] hover:bg-[#F9D774] text-[#5A3E28] py-2 px-4 rounded-lg font-semibold">
+            Search
+          </button>
+        </form>
+        <div id="searchResults" class="space-y-2"></div>
+      </div>
+
+      <!-- New Post -->
+      <form id="postForm" class="bg-white p-6 rounded-lg shadow-md space-y-4">
+        <h2 class="text-xl font-bold text-[#5A3E28]">New Post</h2>
+        <input id="postTitle"
+               type="text"
+               placeholder="Title"
+               required
+               class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]" />
+        <textarea id="postBody"
+                  rows="4"
+                  placeholder="What's on your mind?"
+                  required
+                  class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]"></textarea>
+        <input id="postImageUrl"
+               type="url"
+               placeholder="Image URL (optional)"
+               class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9D774] focus:ring-[#F9A8B8]" />
+        <button type="submit"
+                class="bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 px-4 rounded-lg font-semibold">
+          Post
+        </button>
+      </form>
+
+      <!-- Feed -->
+      <div id="feedContainer" class="space-y-4"></div>
+    </div>
   </main>
+
   <footer class="bg-[#A2EBC0] py-6">…</footer>
   <script type="module" src="/src/js/main.js"></script>
-  <script type="module" src="/src/js/auth.js"></script>
+  <script type="module" src="/src/js/feed.js"></script>
 </body>
 </html>

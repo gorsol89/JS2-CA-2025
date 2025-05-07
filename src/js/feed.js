@@ -1,89 +1,40 @@
 // src/js/feed.js
-import { API_BASE, fetchJSON } from './api.js';
+import { fetchSocial } from './api.js';
 
-// The container in feed.html where posts should appear
 const feedContainer = document.getElementById('feedContainer');
 
-/**
- * renderPost(post)
- * Builds a DOM element for one post:
- * - Author avatar & name
- * - Post image
- * - Body text
- * - Reaction buttons (😹😻😿🐶🎉♥️🌞)
- * - Comment button (stub for now)
- */
+async function loadFeed() {
+  try {
+    // only posts from following
+    const posts = await fetchSocial('/social/posts/following');
+    if (!posts.length) feedContainer.textContent = 'No posts yet.';
+    posts.forEach(renderPost);
+  } catch (err) {
+    feedContainer.textContent = 'Error loading feed: ' + err.message;
+  }
+}
+
 function renderPost(post) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'bg-white p-4 rounded-lg shadow-md';
-
-  // Author block
-  wrapper.innerHTML = `
-    <div class="flex items-center mb-2">
-      <img src="${post.owner.avatar}" class="w-10 h-10 rounded-full" alt="Avatar">
-      <span class="ml-2 font-bold">${post.owner.name}</span>
+  const card = document.createElement('div');
+  card.className = 'bg-white p-4 rounded-lg shadow-md';
+  card.innerHTML = `
+    <div class="flex items-center space-x-2 mb-2">
+      <img src="${post.author.avatar.url}" alt="${post.author.avatar.alt}" class="w-8 h-8 rounded-full" />
+      <span class="font-semibold text-[#5A3E28]">${post.author.name}</span>
     </div>
-    <img src="${post.media}" class="rounded-md mb-2" alt="Post image">
-    <p class="text-gray-700 mb-2">${post.body}</p>
-    <div class="flex justify-between items-center">
-      <div class="flex space-x-2 text-xl" id="reactions-${post.id}">
-        <!-- Buttons injected below -->
-      </div>
-      <button class="text-blue-500">Comment</button>
+    <img src="${post.media.url}" alt="${post.media.alt}" class="w-full max-h-96 object-cover rounded mb-2" />
+    <p class="text-gray-700">${post.body}</p>
+    <div class="mt-2 flex space-x-4 text-xl">
+      <!-- predefined emojis -->
+      ${['😹','😻','😿','🐶','🎉','♥️','🌞']
+        .map(sym => `<button data-id="${post.id}" data-sym="${sym}">${sym}</button>`)
+        .join('')}
     </div>
+    <p class="mt-2 text-sm text-gray-500">
+      ${post._count.reactions} reactions • ${post._count.comments} comments
+    </p>
   `;
-
-  // Add reaction buttons
-  const emojis = ['😹','😻','😿','🐶','🎉','♥️','🌞'];
-  const reactionsDiv = wrapper.querySelector(`#reactions-${post.id}`);
-  emojis.forEach(emoji => {
-    const btn = document.createElement('button');
-    btn.textContent = emoji;
-    btn.onclick = () => react(post.id, emoji);
-    reactionsDiv.appendChild(btn);
-  });
-
-  return wrapper;
+  feedContainer.appendChild(card);
 }
 
-/**
- * loadFeed()
- * 1) Fetch posts you follow (with author data)
- * 2) Clear the container
- * 3) Append each rendered post
- */
-export async function loadFeed() {
-  try {
-    const posts = await fetchJSON(
-      `${API_BASE}/social/posts/following?_author=true`
-    );
-    feedContainer.innerHTML = '';            // clear old
-    posts.forEach(post => {
-      feedContainer.appendChild(renderPost(post));
-    });
-  } catch (err) {
-    feedContainer.textContent = 'Failed to load feed: ' + err.message;
-  }
-}
-
-/**
- * react(id, emoji)
- * Send a reaction to a post, then reload the feed counts.
- */
-async function react(postId, emoji) {
-  try {
-    await fetchJSON(
-      `${API_BASE}/social/posts/${postId}/react/${encodeURIComponent(emoji)}`,
-      { method: 'PUT' }
-    );
-    // Optionally reload feed to fetch updated counts
-    await loadFeed();
-  } catch (err) {
-    alert('Reaction failed: ' + err.message);
-  }
-}
-
-// Initialize feed on page load
-if (feedContainer) {
-  loadFeed();
-}
+document.addEventListener('DOMContentLoaded', loadFeed);

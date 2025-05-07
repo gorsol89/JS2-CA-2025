@@ -3,43 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="/src/style.css" rel="stylesheet">
+
   <title>FuzzyGallery | Feed</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
-
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-[#A2EBC0]">
-    <div class="h-40 flex items-center justify-center">
-      <a href="feed.html" class="flex items-center space-x-4">
-        <img src="/logo.png" alt="Logo" class="h-32" />
-        <span class="text-3xl font-bold text-[#5A3E28]">FuzzyGallery</span>
-      </a>
-    </div>
-  </header>
-
-  <!-- Main: Feed -->
-  <main class="flex-grow p-4 space-y-4 max-w-3xl mx-auto">
-    <h2 class="text-2xl font-semibold text-[#5A3E28]">Your Feed</h2>
-    <div id="feedContainer" class="space-y-6">
-      <!-- JS will inject post cards here -->
-    </div>
+  <header class="sticky top-0 bg-[#A2EBC0]">…</header>
+  <main class="flex-grow flex items-center justify-center p-4">
+    <form id="registerForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4">
+      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">Sign Up</h2>
+      <input id="name"     type="text"  placeholder="Name"  required …/>
+      <input id="email"    type="email" placeholder="Email" required …/>
+      <input id="password" type="password" placeholder="Password" required …/>
+      <textarea id="bio" rows="3" placeholder="Short bio" …></textarea>
+      <input id="avatar" type="url"   placeholder="Avatar URL (Unsplash)" …/>
+      <input id="banner" type="url"   placeholder="Banner URL (Unsplash)" …/>
+      <button type="submit" class="…">Create Account</button>
+      <p class="text-center text-sm">
+        Already have one?
+        <a href="index.html" class="text-[#A8E0FF] hover:text-[#F9D774]">Log in</a>
+      </p>
+    </form>
   </main>
-
-  <!-- Sticky Footer -->
-  <footer class="bg-[#A2EBC0] py-6">
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-7 gap-4">
-      <div class="p-4 bg-[#F9A8B8] text-black text-center rounded">#F9A8B8</div>
-      <div class="p-4 bg-[#A8E0FF] text-black text-center rounded">#A8E0FF</div>
-      <div class="p-4 bg-[#A2EBC0] text-black text-center rounded">#A2EBC0</div>
-      <div class="p-4 bg-[#F9D774] text-black text-center rounded">#F9D774</div>
-      <div class="p-4 bg-[#5A3E28] text-black text-center rounded">#5A3E28</div>
-      <div class="p-4 bg-[#F3EAD1] text-black text-center rounded">#F3EAD1</div>
-      <div class="p-4 bg-[#F501E1] text-black text-center rounded">#F501E1</div>
-    </div>
-  </footer>
-
-  <!-- JS Entries -->
+  <footer class="bg-[#A2EBC0] py-6">…</footer>
   <script type="module" src="/src/js/main.js"></script>
-  <script type="module" src="/src/js/feed.js"></script>
+  <script type="module" src="/src/js/auth.js"></script>
 </body>
 </html>

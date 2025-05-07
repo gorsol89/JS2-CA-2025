@@ -3,67 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FuzzyGallery | New Post</title>
+  <link href="/src/style.css" rel="stylesheet">
+
+  <title>FuzzyGallery | Post</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
-
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-[#A2EBC0]">
-    <div class="h-40 flex items-center justify-center">
-      <a href="feed.html" class="flex items-center space-x-4">
-        <img src="/logo.png" alt="Logo" class="h-32" />
-        <span class="text-3xl font-bold text-[#5A3E28]">FuzzyGallery</span>
-      </a>
-    </div>
-  </header>
-
-  <!-- Main: Post Form -->
+  <header class="sticky top-0 bg-[#A2EBC0]">…</header>
   <main class="flex-grow flex items-center justify-center p-4">
     <form id="postForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4">
-      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">Create New Post</h2>
-      <input
-        id="postTitle"
-        type="text"
-        placeholder="Post title"
-        required
-        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
-      />
-      <input
-        id="postImageUrl"
-        type="url"
-        placeholder="Unsplash image URL"
-        required
-        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
-      />
-      <textarea
-        id="postBody"
-        rows="4"
-        placeholder="Say something about your furry friend..."
-        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
-      ></textarea>
-      <button
-        type="submit"
-        class="w-full bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 rounded-lg font-semibold transition-colors"
-      >
-        Submit Post
-      </button>
+      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">New Post</h2>
+      <input id="postTitle"    type="text" placeholder="Title" … required/>
+      <input id="postImageUrl" type="url"  placeholder="Unsplash URL" … required/>
+      <textarea id="postBody" rows="4" placeholder="Say something…" …></textarea>
+      <button type="submit" class="…">Submit Post</button>
     </form>
   </main>
-
-  <!-- Sticky Footer -->
-  <footer class="bg-[#A2EBC0] py-6">
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-7 gap-4">
-      <div class="p-4 bg-[#F9A8B8] text-black text-center rounded">#F9A8B8</div>
-      <div class="p-4 bg-[#A8E0FF] text-black text-center rounded">#A8E0FF</div>
-      <div class="p-4 bg-[#A2EBC0] text-black text-center rounded">#A2EBC0</div>
-      <div class="p-4 bg-[#F9D774] text-black text-center rounded">#F9D774</div>
-      <div class="p-4 bg-[#5A3E28] text-black text-center rounded">#5A3E28</div>
-      <div class="p-4 bg-[#F3EAD1] text-black text-center rounded">#F3EAD1</div>
-      <div class="p-4 bg-[#F501E1] text-black text-center rounded">#F501E1</div>
-    </div>
-  </footer>
-
-  <!-- JS Entries -->
+  <footer class="bg-[#A2EBC0] py-6">…</footer>
   <script type="module" src="/src/js/main.js"></script>
   <script type="module" src="/src/js/post.js"></script>
 </body>

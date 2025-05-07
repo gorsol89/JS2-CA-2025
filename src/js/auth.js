@@ -1,61 +1,62 @@
 // src/js/auth.js
-import { API_BASE, fetchJSON } from './api.js';
+import { fetchAuth, fetchSocial } from './api.js';
 
-const loginForm    = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
+const loginForm    = document.getElementById('loginForm');
 
-// LOGIN flow
-if (loginForm) {
-  loginForm.addEventListener('submit', async e => {
+// — Register —
+if (registerForm) {
+  registerForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const email    = e.target.email.value;
-    const password = e.target.password.value;
-
+    const { name, email, password, bio, avatar, banner } = e.target.elements;
     try {
-      // 1) Log in and get accessToken
-      const { accessToken } = await fetchJSON(
-        `${API_BASE}/auth/login`,
-        { method: 'POST', body: JSON.stringify({ email, password }) }
-      );
-
-      // 2) Store token
-      localStorage.setItem('accessToken', accessToken);
-
-      // 3) Create & store API key
-      const { key } = await fetchJSON(
-        `${API_BASE}/auth/create-api-key`,
-        { method: 'POST' }
-      );
-      localStorage.setItem('apiKey', key);
-
-      // 4) Redirect to feed
-      window.location.href = 'feed.html';
+      await fetchAuth('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          name:     name.value.trim(),
+          email:    email.value.trim(),
+          password: password.value,
+          bio:      bio.value.trim(),
+          avatar:  avatar.value 
+                   ? { url: avatar.value, alt: `${name.value}'s avatar` }
+                   : undefined,
+          banner:  banner.value 
+                   ? { url: banner.value, alt: `${name.value}'s banner` }
+                   : undefined
+        })
+      });
+      // store for header swap
+      if (avatar.value) localStorage.setItem('avatarURL', avatar.value);
+      if (banner.value) localStorage.setItem('bannerURL', banner.value);
+      window.location.href = 'index.html';
     } catch (err) {
-      alert('Login failed: ' + err.message);
+      alert('Registration failed: ' + err.message);
     }
   });
 }
 
-// REGISTER flow
-if (registerForm) {
-  registerForm.addEventListener('submit', async e => {
+// — Login —
+if (loginForm) {
+  loginForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const name     = e.target.name.value;
-    const email    = e.target.email.value;
-    const password = e.target.password.value;
-    const bio      = e.target.bio.value;
-
+    const { email, password } = e.target.elements;
     try {
-      // 1) Call register endpoint
-      await fetchJSON(
-        `${API_BASE}/auth/register`,
-        { method: 'POST', body: JSON.stringify({ name, email, password, bio }) }
-      );
+      const { accessToken } = await fetchAuth('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email:    email.value.trim(),
+          password: password.value
+        })
+      });
+      localStorage.setItem('accessToken', accessToken);
 
-      // 2) On success, go back to login
-      window.location.href = 'index.html';
+      // now get API key
+      const { key } = await fetchSocial('/auth/create-api-key', { method: 'POST' });
+      localStorage.setItem('apiKey', key);
+
+      window.location.href = 'feed.html';
     } catch (err) {
-      alert('Registration failed: ' + err.message);
+      alert('Login failed: ' + err.message);
     }
   });
 }

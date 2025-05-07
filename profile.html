@@ -3,46 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="/src/style.css" rel="stylesheet">
+
   <title>FuzzyGallery | Profile</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
-
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-[#A2EBC0]">
-    <div class="h-40 flex items-center justify-center">
-      <a href="feed.html" class="flex items-center space-x-4">
-        <img src="/logo.png" alt="Logo" class="h-32" />
-        <span class="text-3xl font-bold text-[#5A3E28]">FuzzyGallery</span>
-      </a>
-    </div>
-  </header>
-
-  <!-- Main: Profile Info -->
+  <header class="sticky top-0 bg-[#A2EBC0]">…</header>
   <main class="flex-grow p-4 max-w-3xl mx-auto space-y-6">
-    <section id="profileInfo" class="bg-white p-6 rounded-lg shadow-md">
-      <!-- JS will inject avatar, name, bio, stats, follow button -->
-    </section>
-
-    <section id="profilePosts" class="space-y-4">
-      <h2 class="text-xl font-semibold text-[#5A3E28]">Posts</h2>
-      <!-- JS will inject the user’s posts here -->
-    </section>
+    <section id="profileInfo" class="bg-white p-6 rounded-lg shadow-md"></section>
+    <section id="profilePosts"></section>
   </main>
-
-  <!-- Sticky Footer -->
-  <footer class="bg-[#A2EBC0] py-6">
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-7 gap-4">
-      <div class="p-4 bg-[#F9A8B8] text-black text-center rounded">#F9A8B8</div>
-      <div class="p-4 bg-[#A8E0FF] text-black text-center rounded">#A8E0FF</div>
-      <div class="p-4 bg-[#A2EBC0] text-black text-center rounded">#A2EBC0</div>
-      <div class="p-4 bg-[#F9D774] text-black text-center rounded">#F9D774</div>
-      <div class="p-4 bg-[#5A3E28] text-black text-center rounded">#5A3E28</div>
-      <div class="p-4 bg-[#F3EAD1] text-black text-center rounded">#F3EAD1</div>
-      <div class="p-4 bg-[#F501E1] text-black text-center rounded">#F501E1</div>
-    </div>
-  </footer>
-
-  <!-- JS Entries -->
+  <footer class="bg-[#A2EBC0] py-6">…</footer>
   <script type="module" src="/src/js/main.js"></script>
   <script type="module" src="/src/js/profile.js"></script>
 </body>

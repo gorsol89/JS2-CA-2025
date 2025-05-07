@@ -3,59 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="/src/style.css" rel="stylesheet">
+
   <title>FuzzyGallery | Login</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
-
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-[#A2EBC0]">
+  <header class="sticky top-0 bg-[#A2EBC0]">
     <div class="h-40 flex items-center justify-center">
-      <a href="/" class="flex items-center space-x-4">
-        <img 
-          src="/logo.png" 
-          alt="FuzzyGallery Logo" 
-          class="h-32 w-auto" 
-          title="FuzzyGallery – share cute animal photos" 
-        />
-        <span class="text-3xl font-bold text-[#5A3E28]">
-          FuzzyGallery
-        </span>
+      <a href="index.html" class="flex items-center space-x-4">
+        <img src="/logo.png" class="h-32" alt="Logo"/>
+        <span class="text-3xl font-bold text-[#5A3E28]">FuzzyGallery</span>
       </a>
     </div>
   </header>
 
-  <!-- Main: Login Form -->
   <main class="flex-grow flex items-center justify-center p-4">
     <form id="loginForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4">
       <h2 class="text-2xl font-bold text-center text-[#5A3E28]">Log In</h2>
-      <input
-        id="email"
-        type="email"
-        placeholder="Email"
-        required
-        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
-      />
-      <input
-        id="password"
-        type="password"
-        placeholder="Password"
-        required
-        class="w-full p-2 border border-[#5A3E28] rounded focus:outline-none focus:ring-1 focus:ring-[#F9A8B8]"
-      />
-      <button
-        type="submit"
-        class="w-full bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 rounded-lg font-semibold transition-colors"
-      >
+      <input id="email"    type="email"    placeholder="Email"
+             class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]" required/>
+      <input id="password" type="password" placeholder="Password"
+             class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]" required/>
+      <button type="submit"
+              class="w-full bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 rounded-lg font-semibold">
         Log In
       </button>
       <p class="text-center text-sm text-[#5A3E28]">
         Don’t have an account?
-        <a
-          href="/pages/register.html"
-          class="text-[#A8E0FF] hover:text-[#F9D774] font-medium"
-        >
-          Sign up
-        </a>
+        <a href="register.html" class="text-[#A8E0FF] hover:text-[#F9D774]">Sign up</a>
       </p>
     </form>
   </main>

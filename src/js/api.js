@@ -26,7 +26,7 @@ export async function fetchAuth(path, opts = {}) {
     headers: authHeaders()
   });
   const body = await res.json();
-  if (!res.ok) throw new Error(body.errors?.map(e=>e.message).join(', ') || res.statusText);
+  if (!res.ok) throw new Error((body.errors || []).map(e => e.message).join(', ') || res.statusText);
   return body.data;
 }
 
@@ -36,13 +36,40 @@ export async function fetchSocial(path, opts = {}) {
     headers: socialHeaders()
   });
 
-  // If no content (DELETE), don't parse JSON
+  // If DELETE/no-content, nothing to parse
   if (res.status === 204 || res.status === 205) {
     if (!res.ok) throw new Error(res.statusText);
     return;
   }
 
   const body = await res.json();
-  if (!res.ok) throw new Error(body.errors?.map(e=>e.message).join(', ') || res.statusText);
+  if (!res.ok) throw new Error((body.errors || []).map(e => e.message).join(', ') || res.statusText);
   return body.data;
+}
+
+// — Search profiles by **partial** name
+export async function searchProfiles(name, page = 1) {
+  // returns an array of profiles, each with id, name, avatar, etc.
+  return fetchSocial(`/social/profiles?name=${encodeURIComponent(name)}&page=${page}`);
+}
+
+// — Wrapper to follow a user
+export async function followUser(userId) {
+  return fetchSocial(`/social/profiles/${userId}/follow`, {
+    method: 'POST',
+    body: JSON.stringify({})
+  });
+}
+
+// — Wrapper to unfollow a user
+export async function unfollowUser(userId) {
+  return fetchSocial(`/social/profiles/${userId}/follow`, {
+    method: 'DELETE',
+    body: JSON.stringify({})
+  });
+}
+
+// — Fetch a user’s own posts
+export async function getUserPosts(userId) {
+  return fetchSocial(`/social/profiles/${userId}/posts`);
 }

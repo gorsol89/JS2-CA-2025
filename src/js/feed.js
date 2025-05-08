@@ -1,5 +1,9 @@
-// src/js/feed.js
-import { fetchSocial } from './api.js';
+import {
+  fetchSocial,
+  searchProfiles,
+  followUser,
+  unfollowUser
+} from './api.js';
 
 const feedContainer       = document.getElementById('feedContainer');
 const postForm            = document.getElementById('postForm');
@@ -10,10 +14,10 @@ const searchInput         = document.getElementById('searchInput');
 const searchResults       = document.getElementById('searchResults');
 
 const me         = localStorage.getItem('username') || 'me';
-let myUserId;             // ← will be set in loadCurrentUser()
+let myUserId;
 let followingSet = new Set();
 
-// 1) Load who you follow (by ID)
+// Load who you follow
 async function loadFollowing() {
   try {
     const profile = await fetchSocial(`/social/profiles/${me}?_following=true`);
@@ -23,14 +27,14 @@ async function loadFollowing() {
   }
 }
 
-// 2) Load your avatar, name & ID
+// Load current user info
 async function loadCurrentUser() {
   try {
     const p = await fetchSocial(`/social/profiles/${me}`);
     myUserId = p.id;
     if (p.avatar?.url) {
       currentUserAvatar.src = p.avatar.url;
-      currentUserAvatar.alt = p.avatar.alt || p.name + ' avatar';
+      currentUserAvatar.alt = `${p.name} avatar`;
     }
     currentUserNameElem.textContent = p.name;
     return p;
@@ -40,23 +44,21 @@ async function loadCurrentUser() {
   }
 }
 
-// 3) Fetch feed (following + own), then render
+// Fetch feed (following + own) including comments & reactions
 async function loadFeed() {
   feedContainer.innerHTML = '';
   try {
     const [follows, mineRaw] = await Promise.all([
-      fetchSocial('/social/posts/following?_author=true'),
-      fetchSocial(`/social/profiles/${me}/posts`)
+      fetchSocial('/social/posts/following?_author=true&_comments=true&_reactions=true'),
+      fetchSocial(`/social/profiles/${me}/posts?_author=true&_comments=true&_reactions=true`)
     ]);
     const profile = await loadCurrentUser();
-
     const mine = profile
       ? mineRaw.map(post => ({
           ...post,
           author: { id: myUserId, name: profile.name, avatar: profile.avatar || {} }
         }))
       : [];
-
     const all = [...follows, ...mine]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -70,12 +72,13 @@ async function loadFeed() {
   }
 }
 
-// 4) Render each post, attaching Edit/Delete only if author.id === myUserId
+// Render one post (with reactions & comments)
 function renderPost(post) {
   const card = document.createElement('div');
   card.className = 'bg-white p-4 rounded-lg shadow-md';
   card.dataset.postId = post.id;
 
+  // Basic post content
   card.innerHTML = `
     <div class="flex items-center space-x-2 mb-2">
       <img src="${post.author.avatar.url||''}"
@@ -92,28 +95,102 @@ function renderPost(post) {
     <p class="post-body text-gray-700 mb-2">${post.body}</p>
   `;
 
+  // Edit/Delete for own posts
   if (post.author.id === myUserId) {
     const ctrls = document.createElement('div');
     ctrls.className = 'flex space-x-4 text-sm mb-2';
-
     const editBtn = document.createElement('button');
     editBtn.textContent = 'Edit';
-    editBtn.className   = 'text-[#5A3E28] hover:text-[#F9D774]';
+    editBtn.className = 'text-[#5A3E28] hover:text-[#F9D774]';
     editBtn.addEventListener('click', () => startEdit(card, post));
-
     const delBtn = document.createElement('button');
-    delBtn.textContent  = 'Delete';
-    delBtn.className    = 'text-[#5A3E28] hover:text-[#F9D774]';
+    delBtn.textContent = 'Delete';
+    delBtn.className = 'text-[#5A3E28] hover:text-[#F9D774]';
     delBtn.addEventListener('click', () => deletePost(card, post.id));
-
     ctrls.append(editBtn, delBtn);
     card.appendChild(ctrls);
   }
 
+  // Reactions bar
+  const reactionsBar = document.createElement('div');
+  reactionsBar.className = 'post-reactions flex items-center space-x-2 mb-2';
+  reactionsBar.innerHTML = `<label class="font-medium">React:</label>`;
+  const emojis = ['🤣','🎉','🐶','❤️','👍','👏','😻','😿'];
+  emojis.forEach(symbol => {
+    const btn = document.createElement('button');
+    btn.textContent = symbol;
+    btn.className = 'emoji-btn text-xl';
+    btn.addEventListener('click', async () => {
+      try {
+        await fetchSocial(`/social/posts/${post.id}/react/${encodeURIComponent(symbol)}`, {
+          method: 'PUT',
+          body: JSON.stringify({})
+        });
+        await loadFeed();
+      } catch (err) {
+        console.error('Reaction failed:', err);
+      }
+    });
+    reactionsBar.appendChild(btn);
+  });
+  card.appendChild(reactionsBar);
+
+  // Show current reaction counts
+  if (post.reactions?.length) {
+    const countsDiv = document.createElement('div');
+    countsDiv.className = 'reaction-counts mb-2 text-sm text-gray-600';
+    post.reactions.forEach(r => {
+      const span = document.createElement('span');
+      span.textContent = `${r.symbol} ${r.count}`;
+      span.className = 'mr-4';
+      countsDiv.appendChild(span);
+    });
+    card.appendChild(countsDiv);
+  }
+
+  // Comments section
+  const commentsDiv = document.createElement('div');
+  commentsDiv.className = 'post-comments mb-4';
+  const ul = document.createElement('ul');
+  ul.className = 'comment-list space-y-1 mb-2 text-sm';
+  (post.comments || []).forEach(c => {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${c.owner}</strong>: ${c.body}`;
+    ul.appendChild(li);
+  });
+  commentsDiv.appendChild(ul);
+
+  // New comment input + button
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'Add a comment...';
+  input.className = 'comment-input w-full p-2 border border-gray-300 rounded mb-2';
+  commentsDiv.appendChild(input);
+
+  const commentBtn = document.createElement('button');
+  commentBtn.textContent = 'Comment';
+  commentBtn.className = 'bg-[#A8E0FF] hover:bg-[#F9D774] text-[#5A3E28] py-1 px-3 rounded text-sm';
+  commentBtn.addEventListener('click', async () => {
+    const body = input.value.trim();
+    if (!body) return;
+    try {
+      await fetchSocial(`/social/posts/${post.id}/comment`, {
+        method: 'POST',
+        body: JSON.stringify({ body })
+      });
+      await loadFeed();
+    } catch (err) {
+      console.error('Adding comment failed:', err);
+    }
+  });
+  commentsDiv.appendChild(commentBtn);
+
+  card.appendChild(commentsDiv);
+
   feedContainer.appendChild(card);
 }
 
-// 5) Create new post
+// Create post
 postForm.addEventListener('submit', async e => {
   e.preventDefault();
   const titleInput = document.getElementById('postTitle');
@@ -130,7 +207,6 @@ postForm.addEventListener('submit', async e => {
           : undefined
       })
     });
-    alert('Post successful!');
     titleInput.value = '';
     bodyInput.value  = '';
     imgInput.value   = '';
@@ -140,7 +216,7 @@ postForm.addEventListener('submit', async e => {
   }
 });
 
-// 6) Delete a post
+// Delete a post
 async function deletePost(card, id) {
   if (!confirm('Delete this post?')) return;
   try {
@@ -149,76 +225,65 @@ async function deletePost(card, id) {
       body: JSON.stringify({})
     });
     card.remove();
-    alert('Post deleted!');
   } catch (err) {
     alert('Failed to delete: ' + err.message);
   }
 }
 
-// 7) Edit a post (PUT-based, unchanged)
+// Edit (unchanged)
 function startEdit(card, post) {
-  /* … your existing PUT-based edit logic … */
+  /* … your existing edit logic … */
 }
 
-// 8) Search & Follow/Unfollow by ID
+// Search & Follow/Unfollow
 searchForm.addEventListener('submit', async e => {
   e.preventDefault();
-  const q = searchInput.value.trim().toLowerCase();
+  const q = searchInput.value.trim();
   searchResults.textContent = 'Searching…';
-
   try {
-    // ← use API filtering endpoint instead of fetching everyone
-    let results = await fetchSocial(`/social/profiles?name=${encodeURIComponent(q)}`);
-
-    // no client-side filtering needed
+    const results = await searchProfiles(q);
     searchResults.innerHTML = '';
     if (!results.length) {
       searchResults.textContent = 'No users found.';
       return;
     }
-
     results.forEach(user => {
       const row = document.createElement('div');
       row.className = 'flex items-center justify-between bg-gray-50 p-2 rounded';
 
       const info = document.createElement('div');
       info.className = 'flex items-center space-x-2';
-      info.innerHTML = user.avatar?.url
-        ? `<img src="${user.avatar.url}" alt="${user.avatar.alt}"
-                 class="w-8 h-8 rounded-full"/>`
-        : `<div class="w-8 h-8 bg-gray-200 rounded-full"></div>`;
+      if (user.avatar?.url) {
+        info.innerHTML = `<img src="${user.avatar.url}" alt="${user.avatar.alt}"
+                               class="w-8 h-8 rounded-full"/>`;
+      } else {
+        info.innerHTML = `<div class="w-8 h-8 bg-gray-200 rounded-full"></div>`;
+      }
       const nameSpan = document.createElement('span');
       nameSpan.className = 'font-medium';
       nameSpan.textContent = user.name;
       info.appendChild(nameSpan);
 
       const btn = document.createElement('button');
-      const isFollowing = followingSet.has(user.id);
-      btn.textContent = isFollowing ? 'Unfollow' : 'Follow';
-      btn.className = isFollowing
-        ? 'text-red-500 hover:text-red-700'
-        : 'text-green-500 hover:text-green-700';
+      const updateFollowBtn = () => {
+        const isFollowingNow = followingSet.has(user.id);
+        btn.textContent = isFollowingNow ? 'Unfollow' : 'Follow';
+        btn.className = isFollowingNow
+          ? 'text-red-500 hover:text-red-700'
+          : 'text-green-500 hover:text-green-700';
+      };
+      updateFollowBtn();
 
       btn.addEventListener('click', async () => {
         try {
-          if (isFollowing) {
-            await fetchSocial(`/social/profiles/${user.id}/follow`, {
-              method: 'DELETE',
-              body: JSON.stringify({})
-            });
+          if (followingSet.has(user.id)) {
+            await unfollowUser(user.id);
             followingSet.delete(user.id);
-            btn.textContent = 'Follow';
-            btn.className = 'text-green-500 hover:text-green-700';
           } else {
-            await fetchSocial(`/social/profiles/${user.id}/follow`, {
-              method: 'POST',
-              body: JSON.stringify({})
-            });
+            await followUser(user.id);
             followingSet.add(user.id);
-            btn.textContent = 'Unfollow';
-            btn.className = 'text-red-500 hover:text-red-700';
           }
-          alert(`${btn.textContent === 'Unfollow' ? 'Followed' : 'Unfollowed'} ${user.name}`);
+          updateFollowBtn();
           await loadFeed();
         } catch (err) {
           alert('Error: ' + err.message);
@@ -233,9 +298,9 @@ searchForm.addEventListener('submit', async e => {
   }
 });
 
-// 9) Initialize everything
+// Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadCurrentUser();  // ensure myUserId is set
+  await loadCurrentUser();
   await loadFollowing();
   await loadFeed();
 });

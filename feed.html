@@ -7,30 +7,57 @@
   <title>FuzzyGallery | Feed</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
-  <!-- Header -->
   <header class="sticky top-0 bg-[#A2EBC0] z-10">
     <div class="h-40 flex items-center justify-between px-4">
+      <!-- Logo -->
       <a href="index.html" class="flex items-center space-x-4">
         <img src="/logo.png" class="h-32" alt="Logo"/>
         <span class="text-3xl font-bold text-[#5A3E28]">FuzzyGallery</span>
       </a>
-      <button id="menuBtn" class="md:hidden p-2 text-[#5A3E28]" aria-label="Toggle menu">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+  
+      <!-- Hamburger button (small screens) -->
+      <button id="menuBtn"
+              class="md:hidden p-2 text-[#5A3E28]"
+              aria-label="Toggle menu">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-8 h-8"
+             fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+          <path stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+  
+      <!-- Desktop nav -->
       <nav class="hidden md:flex space-x-6">
-        <a href="feed.html"    class="text-[#5A3E28] hover:text-[#F9D774]">Feed</a>
-        <a href="profile.html" class="text-[#5A3E28] hover:text-[#F9D774]">Profile</a>
-        <button class="logoutBtn text-[#5A3E28] hover:text-[#F9D774]">Logout</button>
+        <a href="feed.html"
+           class="text-[#5A3E28] hover:text-[#F9D774]">
+          Feed
+        </a>
+        <a href="profile.html"
+           class="text-[#5A3E28] hover:text-[#F9D774]">
+          Profile
+        </a>
+        <button class="logoutBtn text-[#5A3E28] hover:text-[#F9D774]">
+          Logout
+        </button>
       </nav>
     </div>
-    <nav id="mobileMenu" class="md:hidden hidden bg-[#A2EBC0] px-4 pb-4 space-y-2">
-      <a href="feed.html"    class="block text-[#5A3E28] hover:text-[#F9D774]">Feed</a>
-      <a href="profile.html" class="block text-[#5A3E28] hover:text-[#F9D774]">Profile</a>
-      <button class="logoutBtn block w-full text-left text-[#5A3E28] hover:text-[#F9D774]">
+  
+    <!-- Mobile menu -->
+    <nav id="mobileMenu"
+         class="md:hidden hidden bg-[#A2EBC0] px-4 pb-4 space-y-2">
+      <a href="feed.html"
+         class="block text-[#5A3E28] hover:text-[#F9D774]">
+        Feed
+      </a>
+      <a href="profile.html"
+         class="block text-[#5A3E28] hover:text-[#F9D774]">
+        Profile
+      </a>
+      <button class="logoutBtn block text-left w-full text-[#5A3E28] hover:text-[#F9D774]">
         Logout
       </button>
     </nav>
@@ -38,6 +65,7 @@
 
   <main class="flex-grow p-4">
     <div class="w-full max-w-3xl mx-auto space-y-6">
+      
       <!-- Current User -->
       <div id="currentUser" class="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
         <img id="currentUserAvatar" class="w-10 h-10 rounded-full" src="" alt="Your avatar"/>
@@ -61,27 +89,43 @@
       <!-- New Post -->
       <form id="postForm" class="bg-white p-6 rounded-lg shadow-md space-y-4">
         <h2 class="text-xl font-bold text-[#5A3E28]">New Post</h2>
-        <input id="postTitle"
-               type="text"
-               placeholder="Title"
-               required
+        <input id="postTitle" type="text" placeholder="Title" required
                class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]" />
-        <textarea id="postBody"
-                  rows="4"
-                  placeholder="What's on your mind?"
-                  required
-                  class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]"></textarea>
-        <input id="postImageUrl"
-               type="url"
-               placeholder="Image URL (optional)"
-               class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9D774] focus:ring-[#F9A8B8]" />
+        <textarea id="postBody" rows="4" placeholder="What's on your mind?" required
+                  class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9D774]"></textarea>
+        <input id="postImageUrl" type="url" placeholder="Image URL (optional)"
+               class="w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]" />
         <button type="submit"
                 class="bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 px-4 rounded-lg font-semibold">
           Post
         </button>
       </form>
 
-      <!-- Feed -->
+      <!-- Filter & Sort Panel -->
+      <div id="filterPanel" class="bg-white p-4 rounded-lg shadow-md mb-6 flex flex-wrap items-center gap-4">
+        <input id="filterSearch" type="text" placeholder="Search posts…"
+               class="flex-grow min-w-[200px] p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]" />
+        <div id="filterButtons" class="flex gap-2">
+          <button data-filter="all"
+                  class="filter-btn px-3 py-1 rounded-lg bg-[#A8E0FF] hover:bg-[#F9D774] text-[#5A3E28]">
+            All Posts
+          </button>
+          <button data-filter="mine"
+                  class="filter-btn px-3 py-1 rounded-lg bg-[#A8E0E0] hover:bg-[#F9D774] text-[#5A3E28]">
+            My Posts
+          </button>
+          <button data-filter="1day"
+                  class="filter-btn px-3 py-1 rounded-lg bg-[#CFFFB3] hover:bg-[#F9D774] text-[#5A3E28]">
+            Last Day
+          </button>
+          <button data-filter="7days"
+                  class="filter-btn px-3 py-1 rounded-lg bg-[#FFD6A5] hover:bg-[#F9D774] text-[#5A3E28]">
+            Last 7 Days
+          </button>
+        </div>
+      </div>
+
+      <!-- Feed Container -->
       <div id="feedContainer" class="space-y-4"></div>
     </div>
   </main>

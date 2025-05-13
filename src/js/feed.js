@@ -5,80 +5,51 @@ import {
   unfollowUser
 } from './api.js';
 
+console.log('❯ feed.js loaded');
+
+let allPosts       = [];     // in‐memory cache of posts
+let currentFilter  = 'all';  // 'all' | 'mine' | '1day' | '7days'
+let myUserId;
+let followingSet   = new Set();
+const me           = localStorage.getItem('username') || 'me';
+
+// DOM refs
 const feedContainer       = document.getElementById('feedContainer');
-const postForm            = document.getElementById('postForm');
 const currentUserAvatar   = document.getElementById('currentUserAvatar');
 const currentUserNameElem = document.getElementById('currentUserName');
+const postForm            = document.getElementById('postForm');
 const searchForm          = document.getElementById('searchForm');
 const searchInput         = document.getElementById('searchInput');
 const searchResults       = document.getElementById('searchResults');
+const filterButtons       = document.getElementById('filterButtons');
+const filterSearch        = document.getElementById('filterSearch');
 
-const me         = localStorage.getItem('username') || 'me';
-let myUserId;
-let followingSet = new Set();
+console.log('DOM refs:', {
+  feedContainer,
+  currentUserAvatar,
+  currentUserNameElem,
+  postForm,
+  searchForm,
+  filterButtons,
+  filterSearch
+});
 
-// Load who you follow
-async function loadFollowing() {
-  try {
-    const profile = await fetchSocial(`/social/profiles/${me}?_following=true`);
-    followingSet = new Set((profile.following || []).map(u => u.id));
-  } catch (err) {
-    console.error('Error loading following list:', err);
-  }
+// Helper to grab whichever "id" field exists
+function getId(obj) {
+  if (obj.id) return obj.id;
+  if (obj._id) return obj._id;
+  if (obj.attributes?.id) return obj.attributes.id;
+  return null;
 }
 
-// Load current user info
-async function loadCurrentUser() {
-  try {
-    const p = await fetchSocial(`/social/profiles/${me}`);
-    myUserId = p.id;
-    if (p.avatar?.url) {
-      currentUserAvatar.src = p.avatar.url;
-      currentUserAvatar.alt = `${p.name} avatar`;
-    }
-    currentUserNameElem.textContent = p.name;
-    return p;
-  } catch (err) {
-    console.error('Error loading current user:', err);
-    return null;
-  }
-}
-
-// Fetch feed (following + own) including comments & reactions
-async function loadFeed() {
-  feedContainer.innerHTML = '';
-  try {
-    const [follows, mineRaw] = await Promise.all([
-      fetchSocial('/social/posts/following?_author=true&_comments=true&_reactions=true'),
-      fetchSocial(`/social/profiles/${me}/posts?_author=true&_comments=true&_reactions=true`)
-    ]);
-    const profile = await loadCurrentUser();
-    const mine = profile
-      ? mineRaw.map(post => ({
-          ...post,
-          author: { id: myUserId, name: profile.name, avatar: profile.avatar || {} }
-        }))
-      : [];
-    const all = [...follows, ...mine]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    if (!all.length) {
-      feedContainer.textContent = 'No posts yet.';
-    } else {
-      all.forEach(renderPost);
-    }
-  } catch (err) {
-    feedContainer.textContent = 'Error loading feed: ' + err.message;
-  }
-}
-
-// Render one post (with reactions & comments)
+// ————————————————
+// RENDER SINGLE POST
+// ————————————————
 function renderPost(post) {
   const card = document.createElement('div');
   card.className = 'bg-white p-4 rounded-lg shadow-md';
   card.dataset.postId = post.id;
 
-  // Basic post content
   card.innerHTML = `
     <div class="flex items-center space-x-2 mb-2">
       <img src="${post.author.avatar.url||''}"
@@ -86,11 +57,10 @@ function renderPost(post) {
            class="w-8 h-8 rounded-full"/>
       <span class="font-semibold text-[#5A3E28]">${post.author.name}</span>
     </div>
-    ${post.media?.url
-      ? `<img src="${post.media.url}" alt="${post.media.alt}"
-               class="w-full max-h-96 object-cover rounded mb-2"/>`
-      : ''
-    }
+    ${post.media?.url ? `
+      <img src="${post.media.url}" alt="${post.media.alt}"
+           class="w-full max-h-96 object-cover rounded mb-2"/>
+    ` : ''}
     <h3 class="text-lg font-semibold text-[#5A3E28] mb-1">${post.title}</h3>
     <p class="post-body text-gray-700 mb-2">${post.body}</p>
   `;
@@ -102,11 +72,11 @@ function renderPost(post) {
     const editBtn = document.createElement('button');
     editBtn.textContent = 'Edit';
     editBtn.className = 'text-[#5A3E28] hover:text-[#F9D774]';
-    editBtn.addEventListener('click', () => startEdit(card, post));
+    editBtn.onclick = () => startEdit(card, post);
     const delBtn = document.createElement('button');
     delBtn.textContent = 'Delete';
     delBtn.className = 'text-[#5A3E28] hover:text-[#F9D774]';
-    delBtn.addEventListener('click', () => deletePost(card, post.id));
+    delBtn.onclick = () => deletePost(card, post.id);
     ctrls.append(editBtn, delBtn);
     card.appendChild(ctrls);
   }
@@ -115,27 +85,23 @@ function renderPost(post) {
   const reactionsBar = document.createElement('div');
   reactionsBar.className = 'post-reactions flex items-center space-x-2 mb-2';
   reactionsBar.innerHTML = `<label class="font-medium">React:</label>`;
-  const emojis = ['🤣','🎉','🐶','❤️','👍','👏','😻','😿'];
-  emojis.forEach(symbol => {
+  ['🤣','🎉','🐶','❤️','👍','👏','😻','😿'].forEach(symbol => {
     const btn = document.createElement('button');
     btn.textContent = symbol;
     btn.className = 'emoji-btn text-xl';
-    btn.addEventListener('click', async () => {
-      try {
-        await fetchSocial(`/social/posts/${post.id}/react/${encodeURIComponent(symbol)}`, {
-          method: 'PUT',
-          body: JSON.stringify({})
-        });
-        await loadFeed();
-      } catch (err) {
-        console.error('Reaction failed:', err);
-      }
-    });
+    btn.onclick = async () => {
+      console.log('React:', symbol, 'post', post.id);
+      await fetchSocial(
+        `/social/posts/${post.id}/react/${encodeURIComponent(symbol)}`,
+        { method: 'PUT', body: JSON.stringify({}) }
+      );
+      await loadFeed();
+    };
     reactionsBar.appendChild(btn);
   });
   card.appendChild(reactionsBar);
 
-  // Show current reaction counts
+  // Reaction counts
   if (post.reactions?.length) {
     const countsDiv = document.createElement('div');
     countsDiv.className = 'reaction-counts mb-2 text-sm text-gray-600';
@@ -148,7 +114,7 @@ function renderPost(post) {
     card.appendChild(countsDiv);
   }
 
-  // Comments section
+  // Comments
   const commentsDiv = document.createElement('div');
   commentsDiv.className = 'post-comments mb-4';
   const ul = document.createElement('ul');
@@ -160,7 +126,7 @@ function renderPost(post) {
   });
   commentsDiv.appendChild(ul);
 
-  // New comment input + button
+  // New comment form
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'Add a comment...';
@@ -170,19 +136,15 @@ function renderPost(post) {
   const commentBtn = document.createElement('button');
   commentBtn.textContent = 'Comment';
   commentBtn.className = 'bg-[#A8E0FF] hover:bg-[#F9D774] text-[#5A3E28] py-1 px-3 rounded text-sm';
-  commentBtn.addEventListener('click', async () => {
+  commentBtn.onclick = async () => {
     const body = input.value.trim();
     if (!body) return;
-    try {
-      await fetchSocial(`/social/posts/${post.id}/comment`, {
-        method: 'POST',
-        body: JSON.stringify({ body })
-      });
-      await loadFeed();
-    } catch (err) {
-      console.error('Adding comment failed:', err);
-    }
-  });
+    await fetchSocial(`/social/posts/${post.id}/comment`, {
+      method: 'POST',
+      body: JSON.stringify({ body })
+    });
+    await loadFeed();
+  };
   commentsDiv.appendChild(commentBtn);
 
   card.appendChild(commentsDiv);
@@ -190,53 +152,157 @@ function renderPost(post) {
   feedContainer.appendChild(card);
 }
 
-// Create post
-postForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const titleInput = document.getElementById('postTitle');
-  const bodyInput  = document.getElementById('postBody');
-  const imgInput   = document.getElementById('postImageUrl');
-  try {
-    await fetchSocial('/social/posts', {
-      method: 'POST',
-      body: JSON.stringify({
-        title: titleInput.value.trim(),
-        body:  bodyInput.value.trim(),
-        media: imgInput.value.trim()
-          ? { url: imgInput.value.trim(), alt: 'User image' }
-          : undefined
-      })
-    });
-    titleInput.value = '';
-    bodyInput.value  = '';
-    imgInput.value   = '';
-    await loadFeed();
-  } catch (err) {
-    alert('Failed to create post: ' + err.message);
+// ————————————————
+// RENDER POSTS
+// ————————————————
+function renderPosts(posts) {
+  console.log('renderPosts:', posts.length);
+  feedContainer.innerHTML = '';
+  if (!posts.length) {
+    feedContainer.textContent = 'No posts yet.';
+    return;
   }
-});
+  posts.forEach(renderPost);
+}
 
-// Delete a post
+// ————————————————
+// FILTERING
+// ————————————————
+function applyFilters() {
+  console.log('applyFilters:', currentFilter, filterSearch.value);
+  const kw  = filterSearch.value.trim().toLowerCase();
+  const now = Date.now();
+  let items = allPosts.slice();
+
+  if (currentFilter === 'mine') {
+    items = items.filter(p => p.author.id === myUserId);
+    console.log(' filtered mine →', items.length);
+  }
+  if (currentFilter === '1day' || currentFilter === '7days') {
+    const span = currentFilter === '1day' ? 86400000 : 604800000;
+    const cutoff = now - span;
+    items = items.filter(p => new Date(p.createdAt).getTime() >= cutoff);
+    console.log(` filtered ${currentFilter} →`, items.length);
+  }
+  if (kw) {
+    items = items.filter(p =>
+      p.title.toLowerCase().includes(kw) ||
+      p.body.toLowerCase().includes(kw)
+    );
+    console.log(' filtered keyword →', items.length);
+  }
+
+  renderPosts(items);
+}
+
+// ————————————————
+// DATA LOADING
+// ————————————————
+async function loadFollowing() {
+  console.log('loadFollowing');
+  try {
+    const profile = await fetchSocial(`/social/profiles/${me}?_following=true`);
+    const list = profile.following || [];
+    followingSet = new Set(list.map(getId));
+    console.log(' followingSet:', followingSet);
+  } catch (err) {
+    console.error('loadFollowing error:', err);
+  }
+}
+
+async function loadCurrentUser() {
+  console.log('loadCurrentUser');
+  try {
+    const p = await fetchSocial(`/social/profiles/${me}`);
+    myUserId = getId(p);
+    console.log(' myUserId =', myUserId);
+    if (p.avatar?.url) {
+      currentUserAvatar.src = p.avatar.url;
+      currentUserAvatar.alt = `${p.name} avatar`;
+    }
+    currentUserNameElem.textContent = p.name;
+    return p;
+  } catch (err) {
+    console.error('loadCurrentUser error:', err);
+  }
+}
+
+async function loadFeed() {
+  console.log('loadFeed');
+  try {
+    const [follows, mineRaw] = await Promise.all([
+      fetchSocial('/social/posts/following?_author=true&_comments=true&_reactions=true'),
+      fetchSocial(`/social/profiles/${me}/posts?_author=true&_comments=true&_reactions=true`)
+    ]);
+
+    await loadCurrentUser();
+
+    // normalize author.id for all posts
+    const followsNorm = follows.map(post => ({
+      ...post,
+      author: {
+        ...post.author,
+        id: getId(post.author)
+      }
+    }));
+    const mineNorm = mineRaw.map(post => ({
+      ...post,
+      author: {
+        id: myUserId,
+        name: currentUserNameElem.textContent,
+        avatar: { url: currentUserAvatar.src }
+      }
+    }));
+
+    allPosts = [...followsNorm, ...mineNorm]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    console.log(' allPosts:', allPosts.length);
+
+    applyFilters();
+  } catch (err) {
+    console.error('loadFeed error:', err);
+    feedContainer.textContent = 'Error loading feed: ' + err.message;
+  }
+}
+
+// ————————————————
+// POST CREATION & DELETION
+// ————————————————
+postForm.onsubmit = async e => {
+  e.preventDefault();
+  const title = document.getElementById('postTitle').value.trim();
+  const body  = document.getElementById('postBody').value.trim();
+  const url   = document.getElementById('postImageUrl').value.trim();
+
+  await fetchSocial('/social/posts', {
+    method: 'POST',
+    body: JSON.stringify({
+      title,
+      body,
+      media: url ? { url, alt: 'User image' } : undefined
+    })
+  });
+  document.getElementById('postTitle').value = '';
+  document.getElementById('postBody').value  = '';
+  document.getElementById('postImageUrl').value = '';
+  await loadFeed();
+};
+
 async function deletePost(card, id) {
   if (!confirm('Delete this post?')) return;
-  try {
-    await fetchSocial(`/social/posts/${id}`, {
-      method: 'DELETE',
-      body: JSON.stringify({})
-    });
-    card.remove();
-  } catch (err) {
-    alert('Failed to delete: ' + err.message);
-  }
+  await fetchSocial(`/social/posts/${id}`, { method: 'DELETE', body: JSON.stringify({}) });
+  card.remove();
 }
 
-// Edit (unchanged)
 function startEdit(card, post) {
-  /* … your existing edit logic … */
+  console.log('startEdit', post.id);
+  // existing edit logic...
 }
 
-// Search & Follow/Unfollow
-searchForm.addEventListener('submit', async e => {
+// ————————————————
+// SEARCH & FOLLOW/UNFOLLOW
+// ————————————————
+searchForm.onsubmit = async e => {
   e.preventDefault();
   const q = searchInput.value.trim();
   searchResults.textContent = 'Searching…';
@@ -254,8 +320,7 @@ searchForm.addEventListener('submit', async e => {
       const info = document.createElement('div');
       info.className = 'flex items-center space-x-2';
       if (user.avatar?.url) {
-        info.innerHTML = `<img src="${user.avatar.url}" alt="${user.avatar.alt}"
-                               class="w-8 h-8 rounded-full"/>`;
+        info.innerHTML = `<img src="${user.avatar.url}" alt="${user.avatar.alt}" class="w-8 h-8 rounded-full"/>`;
       } else {
         info.innerHTML = `<div class="w-8 h-8 bg-gray-200 rounded-full"></div>`;
       }
@@ -266,41 +331,54 @@ searchForm.addEventListener('submit', async e => {
 
       const btn = document.createElement('button');
       const updateFollowBtn = () => {
-        const isFollowingNow = followingSet.has(user.id);
-        btn.textContent = isFollowingNow ? 'Unfollow' : 'Follow';
-        btn.className = isFollowingNow
-          ? 'text-red-500 hover:text-red-700'
-          : 'text-green-500 hover:text-green-700';
+        const isF = followingSet.has(getId(user));
+        btn.textContent = isF ? 'Unfollow' : 'Follow';
+        btn.className = isF ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700';
       };
       updateFollowBtn();
 
-      btn.addEventListener('click', async () => {
-        try {
-          if (followingSet.has(user.id)) {
-            await unfollowUser(user.id);
-            followingSet.delete(user.id);
-          } else {
-            await followUser(user.id);
-            followingSet.add(user.id);
-          }
-          updateFollowBtn();
-          await loadFeed();
-        } catch (err) {
-          alert('Error: ' + err.message);
+      btn.onclick = async () => {
+        const uid = getId(user);
+        if (followingSet.has(uid)) {
+          await unfollowUser(uid);
+          followingSet.delete(uid);
+        } else {
+          await followUser(uid);
+          followingSet.add(uid);
         }
-      });
+        updateFollowBtn();
+        await loadFeed();
+      };
 
       row.append(info, btn);
       searchResults.appendChild(row);
     });
   } catch (err) {
+    console.error('search error:', err);
     searchResults.textContent = 'Search failed: ' + err.message;
   }
-});
+};
 
-// Initialize
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadCurrentUser();
-  await loadFollowing();
-  await loadFeed();
+// ————————————————
+// INITIALIZATION
+// ————————————————
+document.addEventListener('DOMContentLoaded', () => {
+  // highlight default
+  filterButtons.querySelector('[data-filter="all"]').classList.add('ring-2','ring-[#5A3E28]');
+
+  filterButtons.addEventListener('click', e => {
+    if (!e.target.matches('.filter-btn')) return;
+    currentFilter = e.target.dataset.filter;
+    filterButtons.querySelectorAll('.filter-btn')
+      .forEach(b => b.classList.remove('ring-2','ring-[#5A3E28]'));
+    e.target.classList.add('ring-2','ring-[#5A3E28]');
+    applyFilters();
+  });
+
+  filterSearch.addEventListener('input', applyFilters);
+
+  (async () => {
+    await loadFollowing();
+    await loadFeed();
+  })();
 });

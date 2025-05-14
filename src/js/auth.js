@@ -3,6 +3,11 @@ import { fetchAuth, fetchSocial } from './api.js';
 
 const registerForm = document.getElementById('registerForm');
 const loginForm    = document.getElementById('loginForm');
+const form    = document.getElementById('loginForm');
+const overlay = document.getElementById('loadingOverlay');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
 // — Register —
 if (registerForm) {
@@ -75,3 +80,12 @@ if (loginForm) {
     }
   });
 }
+
+overlay.classList.remove('hidden');
+
+  // Small delay to ensure the overlay renders
+  await new Promise(r => setTimeout(r, 50));
+
+  // Redirect to profile
+  window.location.href = 'profile.html';
+});

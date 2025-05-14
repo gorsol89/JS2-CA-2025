@@ -1,3 +1,4 @@
+// src/js/feed.js
 import {
   fetchSocial,
   searchProfiles,
@@ -7,11 +8,15 @@ import {
 
 console.log('❯ feed.js loaded');
 
-let allPosts       = [];     // in‐memory cache of posts
-let currentFilter  = 'all';  // 'all' | 'mine' | '1day' | '7days'
+let allPosts       = [];
 let myUserId;
 let followingSet   = new Set();
 const me           = localStorage.getItem('username') || 'me';
+
+// server‐side params
+let currentSortField = 'created';
+let currentSortOrder = 'desc';
+let currentTag       = '';
 
 // DOM refs
 const feedContainer       = document.getElementById('feedContainer');
@@ -21,8 +26,10 @@ const postForm            = document.getElementById('postForm');
 const searchForm          = document.getElementById('searchForm');
 const searchInput         = document.getElementById('searchInput');
 const searchResults       = document.getElementById('searchResults');
-const filterButtons       = document.getElementById('filterButtons');
 const filterSearch        = document.getElementById('filterSearch');
+const sortSelect          = document.getElementById('sortSelect');
+const tagInput            = document.getElementById('tagInput');
+const tagBtn              = document.getElementById('tagBtn');
 
 console.log('DOM refs:', {
   feedContainer,
@@ -30,8 +37,12 @@ console.log('DOM refs:', {
   currentUserNameElem,
   postForm,
   searchForm,
-  filterButtons,
-  filterSearch
+  searchInput,
+  searchResults,
+  filterSearch,
+  sortSelect,
+  tagInput,
+  tagBtn
 });
 
 // Helper to grab whichever "id" field exists
@@ -90,7 +101,6 @@ function renderPost(post) {
     btn.textContent = symbol;
     btn.className = 'emoji-btn text-xl';
     btn.onclick = async () => {
-      console.log('React:', symbol, 'post', post.id);
       await fetchSocial(
         `/social/posts/${post.id}/react/${encodeURIComponent(symbol)}`,
         { method: 'PUT', body: JSON.stringify({}) }
@@ -118,19 +128,38 @@ function renderPost(post) {
   const commentsDiv = document.createElement('div');
   commentsDiv.className = 'post-comments mb-4';
   const ul = document.createElement('ul');
-  ul.className = 'comment-list space-y-1 mb-2 text-sm';
+  ul.className = 'comment-list space-y-2 mb-2 text-sm';
   (post.comments || []).forEach(c => {
     const li = document.createElement('li');
-    li.innerHTML = `<strong>${c.owner}</strong>: ${c.body}`;
+    li.className = 'flex items-center justify-between';
+    const contentSpan = document.createElement('span');
+    contentSpan.innerHTML = `<strong>${c.owner}</strong>: ${c.body}`;
+    li.appendChild(contentSpan);
+
+    // Edit/Delete for own comments
+    if (c.owner === me) {
+      const ctrlDiv = document.createElement('div');
+      const editCBtn = document.createElement('button');
+      editCBtn.textContent = '✏️';
+      editCBtn.className = 'ml-2';
+      editCBtn.onclick = () => startCommentEdit(post, c, contentSpan, li);
+      const delCBtn = document.createElement('button');
+      delCBtn.textContent = '🗑';
+      delCBtn.className = 'ml-1';
+      delCBtn.onclick = () => deleteComment(post.id, getId(c));
+      ctrlDiv.append(editCBtn, delCBtn);
+      li.appendChild(ctrlDiv);
+    }
+
     ul.appendChild(li);
   });
-  commentsDiv.appendChild(ul);
 
   // New comment form
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'Add a comment...';
   input.className = 'comment-input w-full p-2 border border-gray-300 rounded mb-2';
+  commentsDiv.appendChild(ul);
   commentsDiv.appendChild(input);
 
   const commentBtn = document.createElement('button');
@@ -148,15 +177,11 @@ function renderPost(post) {
   commentsDiv.appendChild(commentBtn);
 
   card.appendChild(commentsDiv);
-
   feedContainer.appendChild(card);
 }
 
-// ————————————————
 // RENDER POSTS
-// ————————————————
 function renderPosts(posts) {
-  console.log('renderPosts:', posts.length);
   feedContainer.innerHTML = '';
   if (!posts.length) {
     feedContainer.textContent = 'No posts yet.';
@@ -165,57 +190,33 @@ function renderPosts(posts) {
   posts.forEach(renderPost);
 }
 
-// ————————————————
-// FILTERING
-// ————————————————
+// FILTERING (client-side keyword only)
 function applyFilters() {
-  console.log('applyFilters:', currentFilter, filterSearch.value);
-  const kw  = filterSearch.value.trim().toLowerCase();
-  const now = Date.now();
+  const kw = filterSearch.value.trim().toLowerCase();
   let items = allPosts.slice();
-
-  if (currentFilter === 'mine') {
-    items = items.filter(p => p.author.id === myUserId);
-    console.log(' filtered mine →', items.length);
-  }
-  if (currentFilter === '1day' || currentFilter === '7days') {
-    const span = currentFilter === '1day' ? 86400000 : 604800000;
-    const cutoff = now - span;
-    items = items.filter(p => new Date(p.createdAt).getTime() >= cutoff);
-    console.log(` filtered ${currentFilter} →`, items.length);
-  }
   if (kw) {
     items = items.filter(p =>
       p.title.toLowerCase().includes(kw) ||
       p.body.toLowerCase().includes(kw)
     );
-    console.log(' filtered keyword →', items.length);
   }
-
   renderPosts(items);
 }
 
-// ————————————————
 // DATA LOADING
-// ————————————————
 async function loadFollowing() {
-  console.log('loadFollowing');
   try {
     const profile = await fetchSocial(`/social/profiles/${me}?_following=true`);
-    const list = profile.following || [];
-    followingSet = new Set(list.map(getId));
-    console.log(' followingSet:', followingSet);
+    followingSet = new Set((profile.following || []).map(getId));
   } catch (err) {
     console.error('loadFollowing error:', err);
   }
 }
 
 async function loadCurrentUser() {
-  console.log('loadCurrentUser');
   try {
     const p = await fetchSocial(`/social/profiles/${me}`);
     myUserId = getId(p);
-    console.log(' myUserId =', myUserId);
     if (p.avatar?.url) {
       currentUserAvatar.src = p.avatar.url;
       currentUserAvatar.alt = `${p.name} avatar`;
@@ -228,22 +229,27 @@ async function loadCurrentUser() {
 }
 
 async function loadFeed() {
-  console.log('loadFeed');
   try {
+    const tagParam = currentTag ? `&_tag=${encodeURIComponent(currentTag)}` : '';
     const [follows, mineRaw] = await Promise.all([
-      fetchSocial('/social/posts/following?_author=true&_comments=true&_reactions=true'),
-      fetchSocial(`/social/profiles/${me}/posts?_author=true&_comments=true&_reactions=true`)
+      fetchSocial(
+        `/social/posts/following?_author=true&_comments=true&_reactions=true` +
+        `&sort=${currentSortField}&sortOrder=${currentSortOrder}` +
+        `${tagParam}`
+      ),
+      fetchSocial(
+        `/social/profiles/${me}/posts?_author=true&_comments=true&_reactions=true` +
+        `&sort=${currentSortField}&sortOrder=${currentSortOrder}` +
+        `${tagParam}`
+      )
     ]);
 
     await loadCurrentUser();
+    await loadFollowing();
 
-    // normalize author.id for all posts
     const followsNorm = follows.map(post => ({
       ...post,
-      author: {
-        ...post.author,
-        id: getId(post.author)
-      }
+      author: { ...post.author, id: getId(post.author) }
     }));
     const mineNorm = mineRaw.map(post => ({
       ...post,
@@ -256,7 +262,6 @@ async function loadFeed() {
 
     allPosts = [...followsNorm, ...mineNorm]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    console.log(' allPosts:', allPosts.length);
 
     applyFilters();
   } catch (err) {
@@ -265,43 +270,155 @@ async function loadFeed() {
   }
 }
 
-// ————————————————
 // POST CREATION & DELETION
-// ————————————————
 postForm.onsubmit = async e => {
   e.preventDefault();
-  const title = document.getElementById('postTitle').value.trim();
-  const body  = document.getElementById('postBody').value.trim();
-  const url   = document.getElementById('postImageUrl').value.trim();
+  const title      = document.getElementById('postTitle').value.trim();
+  const body       = document.getElementById('postBody').value.trim();
+  const url        = document.getElementById('postImageUrl').value.trim();
+  const alt        = document.getElementById('postImageAlt').value.trim();
+  const tagsStr    = document.getElementById('postTags').value.trim();
+  const tags       = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+  const media      = url ? { url, ...(alt && { alt }) } : undefined;
+
+  const payload = { title, body };
+  if (media)  payload.media = media;
+  if (tags.length) payload.tags = tags;
 
   await fetchSocial('/social/posts', {
     method: 'POST',
-    body: JSON.stringify({
-      title,
-      body,
-      media: url ? { url, alt: 'User image' } : undefined
-    })
+    body: JSON.stringify(payload)
   });
-  document.getElementById('postTitle').value = '';
-  document.getElementById('postBody').value  = '';
-  document.getElementById('postImageUrl').value = '';
+  postForm.reset();
   await loadFeed();
 };
 
 async function deletePost(card, id) {
   if (!confirm('Delete this post?')) return;
-  await fetchSocial(`/social/posts/${id}`, { method: 'DELETE', body: JSON.stringify({}) });
+  await fetchSocial(`/social/posts/${id}`, {
+    method: 'DELETE',
+    body: JSON.stringify({})
+  });
   card.remove();
 }
 
+// INLINE POST EDIT
 function startEdit(card, post) {
-  console.log('startEdit', post.id);
-  // existing edit logic...
+  card.innerHTML = '';
+  const form = document.createElement('form');
+  form.className = 'space-y-4';
+
+  const titleInput = document.createElement('input');
+  titleInput.type = 'text';
+  titleInput.value = post.title;
+  titleInput.className = 'w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]';
+
+  const bodyTextarea = document.createElement('textarea');
+  bodyTextarea.rows = 4;
+  bodyTextarea.value = post.body;
+  bodyTextarea.className = 'w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9D774]';
+
+  const imageInput = document.createElement('input');
+  imageInput.type = 'url';
+  imageInput.value = post.media?.url || '';
+  imageInput.placeholder = 'Image URL (optional)';
+  imageInput.className = 'w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]';
+
+  // Image Alt Text
+  const altInput = document.createElement('input');
+  altInput.type = 'text';
+  altInput.value = post.media?.alt || '';
+  altInput.placeholder = 'Image Alt Text (optional)';
+  altInput.className = 'w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]';
+
+  // Tags
+  const tagsInput = document.createElement('input');
+  tagsInput.type = 'text';
+  tagsInput.value = (post.tags || []).join(', ');
+  tagsInput.placeholder = 'Tags (comma-separated)';
+  tagsInput.className = 'w-full p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]';
+
+  const btnContainer = document.createElement('div');
+  btnContainer.className = 'flex gap-2';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'submit';
+  saveBtn.textContent = 'Save';
+  saveBtn.className = 'bg-[#A8E0FF] hover:bg-[#F9D774] text-[#5A3E28] py-2 px-4 rounded-lg font-semibold';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.className = 'bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-2 px-4 rounded-lg font-semibold';
+  cancelBtn.onclick = () => loadFeed();
+
+  btnContainer.append(saveBtn, cancelBtn);
+  form.append(titleInput, bodyTextarea, imageInput, altInput, tagsInput, btnContainer);
+  card.appendChild(form);
+
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const updatedTitle  = titleInput.value.trim();
+    const updatedBody   = bodyTextarea.value.trim();
+    const urlVal        = imageInput.value.trim();
+    const altVal        = altInput.value.trim();
+    const tagsValStr    = tagsInput.value.trim();
+    const tagsArray     = tagsValStr ? tagsValStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const mediaPayload  = urlVal ? { url: urlVal, ...(altVal && { alt: altVal }) } : undefined;
+
+    const payload = {
+      title: updatedTitle,
+      body:  updatedBody
+    };
+    if (mediaPayload) payload.media = mediaPayload;
+    if (tagsArray.length) payload.tags = tagsArray;
+
+    await fetchSocial(`/social/posts/${post.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+    await loadFeed();
+  };
 }
 
-// ————————————————
+// INLINE COMMENT EDIT / DELETE
+async function deleteComment(postId, commentId) {
+  if (!confirm('Delete this comment?')) return;
+  await fetchSocial(
+    `/social/posts/${postId}/comment/${commentId}`,
+    { method: 'DELETE', body: JSON.stringify({}) }
+  );
+  await loadFeed();
+}
+
+function startCommentEdit(post, comment, contentSpan, li) {
+  li.innerHTML = '';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = comment.body;
+  input.className = 'w-full p-2 border border-gray-300 rounded mb-2';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = 'Save';
+  saveBtn.className = 'bg-[#A8E0FF] hover:bg-[#F9D774] text-[#5A3E28] py-1 px-3 rounded text-sm';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.className = 'bg-[#F9A8B8] hover:bg-[#F9D774] text-[#5A3E28] py-1 px-3 rounded text-sm';
+
+  li.append(input, saveBtn, cancelBtn);
+
+  saveBtn.onclick = async () => {
+    await fetchSocial(
+      `/social/posts/${post.id}/comment/${getId(comment)}`,
+      { method: 'PUT', body: JSON.stringify({ body: input.value.trim() }) }
+    );
+    await loadFeed();
+  };
+  cancelBtn.onclick = () => loadFeed();
+}
+
 // SEARCH & FOLLOW/UNFOLLOW
-// ————————————————
 searchForm.onsubmit = async e => {
   e.preventDefault();
   const q = searchInput.value.trim();
@@ -333,7 +450,9 @@ searchForm.onsubmit = async e => {
       const updateFollowBtn = () => {
         const isF = followingSet.has(getId(user));
         btn.textContent = isF ? 'Unfollow' : 'Follow';
-        btn.className = isF ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700';
+        btn.className = isF
+          ? 'text-red-500 hover:text-red-700'
+          : 'text-green-500 hover:text-green-700';
       };
       updateFollowBtn();
 
@@ -359,23 +478,21 @@ searchForm.onsubmit = async e => {
   }
 };
 
-// ————————————————
 // INITIALIZATION
-// ————————————————
 document.addEventListener('DOMContentLoaded', () => {
-  // highlight default
-  filterButtons.querySelector('[data-filter="all"]').classList.add('ring-2','ring-[#5A3E28]');
+  filterSearch.addEventListener('input', applyFilters);
 
-  filterButtons.addEventListener('click', e => {
-    if (!e.target.matches('.filter-btn')) return;
-    currentFilter = e.target.dataset.filter;
-    filterButtons.querySelectorAll('.filter-btn')
-      .forEach(b => b.classList.remove('ring-2','ring-[#5A3E28]'));
-    e.target.classList.add('ring-2','ring-[#5A3E28]');
-    applyFilters();
+  sortSelect.addEventListener('change', () => {
+    const [f, o] = sortSelect.value.split(':');
+    currentSortField = f;
+    currentSortOrder = o;
+    loadFeed();
   });
 
-  filterSearch.addEventListener('input', applyFilters);
+  tagBtn.addEventListener('click', () => {
+    currentTag = tagInput.value.trim();
+    loadFeed();
+  });
 
   (async () => {
     await loadFollowing();

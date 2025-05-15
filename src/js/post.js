@@ -1,31 +1,16 @@
 // src/js/post.js
+import { fetchSocial } from './api.js';
 
-const token  = localStorage.getItem('accessToken');
-const apiKey = localStorage.getItem('apiKey');
 const container = document.getElementById('post-detail');
-
 container.innerHTML = '<p>Loading…</p>';
 
 const postId = new URLSearchParams(window.location.search).get('id');
 if (!postId) {
-  container.innerHTML = '<p class="text-red-600">Error: No post ID provided.</p>';
+  container.innerHTML = '<p class="text-red-600">Error: No post ID in URL.</p>';
   throw new Error('Missing post ID');
 }
 
-fetch(`https://api.noroff.dev/api/v1/social/posts/${postId}?_author=true&_comments=true&_reactions=true`, {
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'X-Noroff-API-Key': apiKey
-  }
-})
-  .then(res => {
-    if (res.status === 401) {
-      window.location = 'index.html';
-      throw new Error('Unauthorized');
-    }
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  })
+fetchSocial(`/social/posts/${postId}?_author=true&_comments=true&_reactions=true`)
   .then(renderPost)
   .catch(err => {
     container.innerHTML = `<p class="text-red-600">Error loading post: ${err.message}</p>`;
@@ -35,7 +20,9 @@ fetch(`https://api.noroff.dev/api/v1/social/posts/${postId}?_author=true&_commen
 function renderPost(post) {
   const { title, body, media, author, reactions, comments, created } = post;
   const date = new Date(created).toLocaleString();
-  const likes = Array.isArray(reactions) ? reactions.filter(r => r.like).length : 0;
+  const likes = Array.isArray(reactions)
+    ? reactions.filter(r => r.like).length
+    : 0;
 
   const commentsHTML = Array.isArray(comments) && comments.length
     ? comments.map(c => {
@@ -55,7 +42,7 @@ function renderPost(post) {
       ${media ? `<img src="${media}" alt="Post image" class="w-full my-4 rounded" />` : ''}
       <div class="mt-4">${body}</div>
       <p class="mt-6"><strong>Likes:</strong> ${likes}</p>
-      <hr class="my-6" />
+      <hr class="my-6"/>
       <section>
         <h2 class="text-2xl font-semibold mb-4">Comments (${Array.isArray(comments)?comments.length:0})</h2>
         ${commentsHTML}

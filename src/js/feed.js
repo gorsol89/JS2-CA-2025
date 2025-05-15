@@ -494,6 +494,15 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFeed();
   });
 
+  // make cards clickable: navigate to detail page
+  feedContainer.addEventListener('click', (e) => {
+    const card = e.target.closest('[data-post-id]');
+    if (card) {
+      const postId = card.getAttribute('data-post-id');
+      window.location.href = `post.html?id=${postId}`;
+    }
+  });
+
   (async () => {
     await loadFollowing();
     await loadFeed();

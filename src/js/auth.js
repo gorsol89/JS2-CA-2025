@@ -3,19 +3,17 @@ import { fetchAuth, fetchSocial } from './api.js';
 
 const registerForm = document.getElementById('registerForm');
 const loginForm    = document.getElementById('loginForm');
-const form    = document.getElementById('loginForm');
-const overlay = document.getElementById('loadingOverlay');
+const overlay      = document.getElementById('loadingOverlay');
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-// — Register —
 if (registerForm) {
-  registerForm.addEventListener('submit', async e => {
+  registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // show loading overlay
+    overlay.classList.remove('hidden');
+
     const { name, email, password, bio, avatar, banner } = e.target.elements;
     try {
-      // Register new user (returns user profile) :contentReference[oaicite:0]{index=0}
+      // Register new user (returns user profile)
       const user = await fetchAuth('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
@@ -23,10 +21,10 @@ if (registerForm) {
           email:    email.value.trim(),
           password: password.value,
           bio:      bio.value.trim(),
-          avatar:   avatar.value 
+          avatar:   avatar.value
                      ? { url: avatar.value, alt: `${name.value}'s avatar` }
                      : undefined,
-          banner:   banner.value 
+          banner:   banner.value
                      ? { url: banner.value, alt: `${name.value}'s banner` }
                      : undefined
         })
@@ -35,22 +33,26 @@ if (registerForm) {
       console.log('Registered:', user);
       alert('Registration successful! Please log in.');
 
-      // Redirect back to login
+      // hide overlay and redirect
+      overlay.classList.add('hidden');
       window.location.href = 'index.html';
     } catch (err) {
       console.error(err);
+      overlay.classList.add('hidden');
       alert('Registration failed: ' + err.message);
     }
   });
 }
 
-// — Login —
 if (loginForm) {
-  loginForm.addEventListener('submit', async e => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // show loading overlay
+    overlay.classList.remove('hidden');
+
     const { email, password } = e.target.elements;
     try {
-      // Log the user in (returns profile + accessToken) :contentReference[oaicite:1]{index=1}
+      // Log the user in (returns profile + accessToken)
       const { accessToken, name } = await fetchAuth('/auth/login', {
         method: 'POST',
         body: JSON.stringify({
@@ -59,10 +61,11 @@ if (loginForm) {
         })
       });
 
+      // store tokens
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('username', name);
+      localStorage.setItem('username',   name);
 
-      // Create/Renew API key (must send valid JSON body) :contentReference[oaicite:2]{index=2}
+      // Create/Renew API key
       const { key } = await fetchSocial('/auth/create-api-key', {
         method: 'POST',
         body: JSON.stringify({})
@@ -72,20 +75,13 @@ if (loginForm) {
       console.log('Logged in as:', name);
       alert('Login successful! Redirecting to your profile…');
 
-      // Go to profile page
+      // hide overlay and redirect
+      overlay.classList.add('hidden');
       window.location.href = 'profile.html';
     } catch (err) {
       console.error(err);
+      overlay.classList.add('hidden');
       alert('Login failed: ' + err.message);
     }
   });
 }
-
-overlay.classList.remove('hidden');
-
-  // Small delay to ensure the overlay renders
-  await new Promise(r => setTimeout(r, 50));
-
-  // Redirect to profile
-  window.location.href = 'profile.html';
-});

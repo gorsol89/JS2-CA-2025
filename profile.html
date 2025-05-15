@@ -1,112 +1,102 @@
-<!-- profile.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link href="/src/style.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="/src/style.css" rel="stylesheet" />
   <title>FuzzyGallery | Profile</title>
 </head>
 <body class="flex flex-col min-h-screen bg-[#F3EAD1]">
   <header class="sticky top-0 bg-[#A2EBC0] z-10">
-  <div class="h-24 md:h-40 flex items-center justify-between px-4">
-    <!-- Logo -->
-    <a href="index.html" class="flex items-center space-x-4">
-      <img src="/logo.png" class="h-24 md:h-32" alt="Logo"/>
-      <span class="text-2xl md:text-3xl font-bold text-pink-500 md:text-[#5A3E28]">
-        FuzzyGallery
-      </span>
-    </a>
-
-    <!-- Hamburger button (mobile only) -->
-    <button id="menuBtn"
-            class="md:hidden p-2 text-pink-500 hover:text-pink-700"
-            aria-label="Toggle menu">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           class="w-8 h-8"
-           fill="none" viewBox="0 0 24 24"
-           stroke="currentColor">
-        <path stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-
-    <!-- Desktop nav -->
-    <nav class="hidden md:flex space-x-6 text-[#5A3E28]">
-      <a href="feed.html" class="hover:text-[#F9D774]">Feed</a>
-      <a href="profile.html" class="hover:text-[#F9D774]">Profile</a>
-      <button class="logoutBtn hover:text-[#F9D774]">Logout</button>
+    <div class="h-24 md:h-40 flex items-center justify-between px-4">
+      <a href="index.html" class="flex items-center space-x-4">
+        <img src="/logo.png" alt="Logo" class="h-24 md:h-32" />
+        <span class="text-2xl md:text-3xl font-bold text-pink-500 md:text-[#5A3E28]">
+          FuzzyGallery
+        </span>
+      </a>
+      <button
+        id="menuBtn"
+        class="md:hidden p-2 text-pink-500 hover:text-pink-700"
+        aria-label="Toggle menu"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-8 h-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+      <nav class="hidden md:flex space-x-6 text-[#5A3E28]">
+        <a href="feed.html" class="hover:text-[#F9D774]">Feed</a>
+        <a href="profile.html" class="hover:text-[#F9D774]">Profile</a>
+        <button class="logoutBtn hover:text-[#F9D774]">Logout</button>
+      </nav>
+    </div>
+    <nav
+      id="mobileMenu"
+      class="md:hidden hidden bg-[#A2EBC0] px-4 pb-4 space-y-2"
+    >
+      <a href="feed.html" class="block text-pink-500 hover:text-pink-700">Feed</a>
+      <a href="profile.html" class="block text-pink-500 hover:text-pink-700">Profile</a>
+      <button
+        class="logoutBtn block w-full text-left text-pink-500 hover:text-pink-700"
+      >
+        Logout
+      </button>
     </nav>
-  </div>
+  </header>
 
-  <!-- Mobile menu -->
-  <nav id="mobileMenu"
-       class="md:hidden hidden bg-[#A2EBC0] px-4 pb-4 space-y-2">
-    <a href="feed.html"
-       class="block text-pink-500 hover:text-pink-700">
-      Feed
-    </a>
-    <a href="profile.html"
-       class="block text-pink-500 hover:text-pink-700">
-      Profile
-    </a>
-    <button class="logoutBtn block w-full text-left text-pink-500 hover:text-pink-700">
-      Logout
-    </button>
-  </nav>
-</header>
   <main class="flex-grow p-4 max-w-3xl mx-auto space-y-6">
     <section id="profileInfo" class="bg-white rounded-lg shadow-md overflow-hidden"></section>
     <section id="profilePosts"></section>
-      <!-- Hello cat fixed bottom-right -->
-  <img
-    src="/cat4.png"
-    alt="Cute illustration of a cat"
-    class="fixed bottom-4 right-4 h-34 w-auto z-10 pointer-events-none"
-  />
+    <img
+      src="/cat4.png"
+      alt="Cute illustration of a cat"
+      class="fixed bottom-4 right-4 h-34 w-auto z-10 pointer-events-none"
+    />
   </main>
 
-<footer
-  class="bg-[#A2EBC0] py-6 fixed bottom-0 left-0 w-full"
-  style="font-family: Monaco, Menlo, Consolas, 'Liberation Mono', Courier, monospace;"
->
-  <div class="max-w-3xl mx-auto flex items-center justify-between px-4 text-[#5A3E28]">
-    <!-- Left side: © 2025 Gøril Solheim + GitHub -->
-    <div class="flex items-center gap-4">
-      <span class="flex items-baseline gap-2">
-        <span class="text-base">2025</span>
-        <span class="text-base">&copy;</span>
-        <span class="text-lg">Gøril Solheim</span>
-      </span>
-      <a href="https://github.com/gorsol89/JS2-CA-2025/tree/JS2"
-         target="_blank"
-         rel="noopener noreferrer"
-         class="hover:text-[#F9D774]">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             class="w-6 h-6 fill-current"
-             viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 .297c-6.63 0-12 5.373-12 12
-            0 5.302 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577
-            0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61
-            -.546-1.387-1.333-1.757-1.333-1.757-1.09-.744.084-.729.084-.729
-            1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.807 1.305 3.492.998
-            .108-.776.418-1.305.762-1.605-2.665-.3-5.467-1.332-5.467-5.93
-            0-1.31.467-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176
-            0 0 1.005-.322 3.3 1.23a11.52 11.52 0 0 1 3-.405
-            c1.02.005 2.045.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23
-            .645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22
-            0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22
-            0 1.606-.015 2.896-.015 3.286 0 .315.21.694.825.576
-            4.765-1.585 8.2-6.083 8.2-11.385
-            0-6.627-5.373-12-12-12z"/>
-        </svg>
-      </a>
+  <footer
+    class="bg-[#A2EBC0] py-6 fixed bottom-0 left-0 w-full"
+    style="font-family: Monaco, Menlo, Consolas, 'Liberation Mono', Courier, monospace;"
+  >
+    <div class="max-w-3xl mx-auto flex items-center justify-between px-4 text-[#5A3E28]">
+      <div class="flex items-center gap-4">
+        <span class="flex items-baseline gap-2">
+          <span class="text-base">2025</span>
+          <span class="text-base">&copy;</span>
+          <span class="text-lg">Gøril Solheim</span>
+        </span>
+        <a
+          href="https://github.com/gorsol89/JS2-CA-2025/tree/JS2"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-[#F9D774]"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6 fill-current"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 .297c-6.63 0-12 5.373-12 12 0 5.302 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.09-.744.084-.729.084-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.467-1.332-5.467-5.93 0-1.31.467-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23a11.52 11.52 0 0 1 3-.405c1.02.005 2.045.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.694.825.576 4.765-1.585 8.2-6.083 8.2-11.385 0-6.627-5.373-12-12-12z"
+            />
+          </svg>
+        </a>
+      </div>
     </div>
+  </footer>
 
-
-</footer>
   <script type="module" src="/src/js/main.js"></script>
   <script type="module" src="/src/js/profile.js"></script>
 </body>

@@ -18,11 +18,15 @@ fetchSocial(`/social/posts/${postId}?_author=true&_comments=true&_reactions=true
   });
 
 function renderPost(post) {
-  const { title, body, media, author, reactions, comments, created } = post;
+  const { title, body, media, tags, author, reactions, comments, created } = post;
   const date = new Date(created).toLocaleString();
-  const likes = Array.isArray(reactions)
-    ? reactions.filter(r => r.like).length
-    : 0;
+  const likes = Array.isArray(reactions) ? reactions.filter(r => r.like).length : 0;
+
+  const tagsHTML = Array.isArray(tags) && tags.length
+    ? `<p class="mt-4">${tags.map(tag =>
+        `<span class="inline-block bg-gray-200 text-sm px-2 py-1 rounded mr-2">#${tag}</span>`
+      ).join('')}</p>`
+    : '';
 
   const commentsHTML = Array.isArray(comments) && comments.length
     ? comments.map(c => {
@@ -39,12 +43,15 @@ function renderPost(post) {
     <article class="prose mx-auto">
       <h1 class="text-3xl font-bold">${title}</h1>
       <p class="text-sm text-gray-600">by ${author.name} on ${date}</p>
-      ${media ? `<img src="${media}" alt="Post image" class="w-full my-4 rounded" />` : ''}
+      ${media ? `<img src="${media.url}" alt="${media.alt||'Post image'}" class="w-full my-4 rounded" />` : ''}
       <div class="mt-4">${body}</div>
+      ${tagsHTML}
       <p class="mt-6"><strong>Likes:</strong> ${likes}</p>
       <hr class="my-6"/>
       <section>
-        <h2 class="text-2xl font-semibold mb-4">Comments (${Array.isArray(comments)?comments.length:0})</h2>
+        <h2 class="text-2xl font-semibold mb-4">
+          Comments (${Array.isArray(comments)?comments.length:0})
+        </h2>
         ${commentsHTML}
       </section>
     </article>

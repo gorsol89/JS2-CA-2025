@@ -1,25 +1,49 @@
+<!-- post.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link href="/src/style.css" rel="stylesheet">
-
   <title>FuzzyGallery | Post</title>
+  <!-- keep your existing stylesheet reference -->
+  <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="flex flex-col min-h-screen bg-[#F3EAD1]">
-  <header class="sticky top-0 bg-[#A2EBC0]">…</header>
-  <main class="flex-grow flex items-center justify-center p-4">
-    <form id="postForm" class="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4">
-      <h2 class="text-2xl font-bold text-center text-[#5A3E28]">New Post</h2>
-      <input id="postTitle"    type="text" placeholder="Title" … required/>
-      <input id="postImageUrl" type="url"  placeholder="Unsplash URL" … required/>
-      <textarea id="postBody" rows="4" placeholder="Say something…" …></textarea>
-      <button type="submit" class="…">Submit Post</button>
-    </form>
+<body class="bg-gray-50 text-gray-900">
+  <!-- copy your existing nav exactly from feed.html -->
+  <nav class="bg-white shadow">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="feed.html" class="text-2xl font-bold">FuzzyGallery</a>
+      <div class="space-x-4">
+        <a href="feed.html" class="hover:text-blue-500">Feed</a>
+        <a href="profile.html" class="hover:text-blue-500">Profile</a>
+        <button id="logout" class="hover:text-blue-500">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="container mx-auto my-8 p-4 bg-white rounded shadow">
+      <p>
+        <a href="feed.html" class="text-blue-600 hover:underline">
+          &larr; Back to Feed
+        </a>
+      </p>
+      <div id="post-detail" class="prose mx-auto mt-6">
+        <!-- JS will inject the post detail here -->
+      </div>
+    </section>
   </main>
-  <footer class="bg-[#A2EBC0] py-6">…</footer>
-  <script type="module" src="/src/js/main.js"></script>
-  <script type="module" src="/src/js/post.js"></script>
+
+  <!-- copy your existing footer exactly from feed.html/profile.html -->
+  <footer class="text-center py-4 text-sm text-gray-500">
+    &copy; 2025 © Gøril Solheim
+    <a href="https://github.com/your-github-username" target="_blank">github.com</a>
+  </footer>
+
+  <!-- your existing auth helper -->
+  <script src="js/auth.js" defer></script>
+  <!-- our new detail-page script -->
+  <script src="js/post.js" defer></script>
 </body>
 </html>

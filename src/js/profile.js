@@ -28,6 +28,17 @@ async function loadProfile() {
       `/social/profiles/${me}/posts?_author=true&_comments=true&_reactions=true`
     );
     renderPosts(posts);
+
+    // Listen for cross-tab follow/unfollow changes
+    if (!window._profile_storage_listener_added) {
+      window.addEventListener('storage', e => {
+        if (e.key === 'followingSet') {
+          loadProfile();
+        }
+      });
+      window._profile_storage_listener_added = true;
+    }
+
   } catch (err) {
     infoSec.textContent = 'Error loading profile: ' + err.message;
   }

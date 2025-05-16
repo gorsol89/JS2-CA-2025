@@ -81,28 +81,6 @@
         <span id="currentUserName" class="font-semibold text-lg text-[#5A3E28]">
         </span>
       </div>
-
-      <!-- Find Users -->
-      <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
-        <h2 class="text-xl font-bold text-[#5A3E28]">Find Users</h2>
-        <form id="searchForm" class="flex space-x-2">
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="Username"
-            required
-            class="flex-grow p-2 border border-[#5A3E28] rounded focus:ring-1 focus:ring-[#F9A8B8]"
-          />
-          <button
-            type="submit"
-            class="bg-[#A8E0FF] hover:bg-[#F9D774] text-[#5A3E28] py-2 px-4 rounded-lg font-semibold"
-          >
-            Search
-          </button>
-        </form>
-        <div id="searchResults" class="space-y-2"></div>
-      </div>
-
       <!-- New Post -->
       <form id="postForm" class="bg-white p-6 rounded-lg shadow-md space-y-4">
         <h2 class="text-xl font-bold text-[#5A3E28]">New Post</h2>
@@ -146,7 +124,6 @@
         </button>
       </form>
 
-      <!-- Filter & Sort Panel -->
       <div
         id="filterPanel"
         class="bg-white p-4 rounded-lg shadow-md mb-6 flex flex-wrap items-center gap-4"
@@ -194,6 +171,9 @@
       alt="Cute illustration of a cat in a cardboard box"
       class="fixed bottom-4 right-4 h-34 w-auto z-10 pointer-events-none"
     />
+
+    <!-- Toast notification (add this above </main>) -->
+    <div id="toast" class="fixed bottom-8 right-8 z-50 hidden min-w-[180px] max-w-xs px-4 py-2 bg-[#A8E0FF] text-[#5A3E28] rounded-xl shadow-lg border border-[#5A3E28] text-center font-semibold text-base transition-all"></div>
   </main>
 
   <footer
@@ -230,5 +210,6 @@
 
   <script type="module" src="/src/js/main.js"></script>
   <script type="module" src="/src/js/feed.js"></script>
+  <script type="module" src="/src/js/auth.js"></script>
 </body>
 </html>

@@ -5,11 +5,12 @@ const registerForm = document.getElementById('registerForm');
 const loginForm    = document.getElementById('loginForm');
 const overlay      = document.getElementById('loadingOverlay');
 
+// REGISTER
 if (registerForm) {
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // show loading overlay
-    overlay.classList.remove('hidden');
+    // show loading overlay if present
+    if (overlay) overlay.classList.remove('hidden');
 
     const { name, email, password, bio, avatar, banner } = e.target.elements;
     try {
@@ -30,25 +31,23 @@ if (registerForm) {
         })
       });
 
-      console.log('Registered:', user);
-      alert('Registration successful! Please log in.');
-
-      // hide overlay and redirect
-      overlay.classList.add('hidden');
-      window.location.href = 'index.html';
+      // Hide overlay and redirect to register-success page
+      if (overlay) overlay.classList.add('hidden');
+      window.location.href = 'register-success.html';
     } catch (err) {
       console.error(err);
-      overlay.classList.add('hidden');
+      if (overlay) overlay.classList.add('hidden');
       alert('Registration failed: ' + err.message);
     }
   });
 }
 
+// LOGIN
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // show loading overlay
-    overlay.classList.remove('hidden');
+    // show loading overlay if present
+    if (overlay) overlay.classList.remove('hidden');
 
     const { email, password } = e.target.elements;
     try {
@@ -72,15 +71,12 @@ if (loginForm) {
       });
       localStorage.setItem('apiKey', key);
 
-      console.log('Logged in as:', name);
-      alert('Login successful! Redirecting to your profile…');
-
-      // hide overlay and redirect
-      overlay.classList.add('hidden');
-      window.location.href = 'profile.html';
+      // hide overlay and redirect to FEED (no alerts)
+      if (overlay) overlay.classList.add('hidden');
+      window.location.href = 'feed.html';
     } catch (err) {
       console.error(err);
-      overlay.classList.add('hidden');
+      if (overlay) overlay.classList.add('hidden');
       alert('Login failed: ' + err.message);
     }
   });

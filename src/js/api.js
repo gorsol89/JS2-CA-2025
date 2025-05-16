@@ -1,94 +1,67 @@
 // src/js/api.js
 
+// Noroff API base url - don't forget to set .env or stuff breaks!
 export const API_BASE = import.meta.env.VITE_API_BASE;
-const DEFAULT_API_KEY = import.meta.env.VITE_NOROFF_API_KEY;
+const DEFAULT_API_KEY = import.meta.env.VITE_NOROFF_API_KEY; 
 
-// For /auth/register and /auth/login
 function authHeaders() {
+  // Standard headers for /auth endpoints
   return { 'Content-Type': 'application/json' };
 }
 
-// For all /social/* routes
 function socialHeaders() {
-  // check both storages for token and API key
-  const token  =
-    localStorage.getItem('accessToken') ||
-    sessionStorage.getItem('accessToken') ||
-    import.meta.env.VITE_BEARER_TOKEN;
-  const apiKey =
-    localStorage.getItem('apiKey') ||
-    sessionStorage.getItem('apiKey') ||
-    DEFAULT_API_KEY;
-
+  // Not sure if apiKey is always in localStorage, fallback to default
+  const token  = localStorage.getItem('accessToken') || import.meta.env.VITE_BEARER_TOKEN;
+  const apiKey = localStorage.getItem('apiKey') || DEFAULT_API_KEY;
+  // console.log('Using API key:', apiKey); // Debug line for testing
   return {
-    'Content-Type':     'application/json',
-    'Authorization':    `Bearer ${token}`,
-    'X-Noroff-API-Key': apiKey
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'X-Noroff-API-Key': apiKey,
   };
 }
 
-export async function fetchAuth(path, opts = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...opts,
-    headers: authHeaders()
-  });
-  const body = await res.json();
-  if (!res.ok) {
-    throw new Error(
-      (body.errors || []).map(e => e.message).join(', ') || res.statusText
-    );
+export async function fetchAuth(endpoint, options = {}) {
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers: {
+        ...authHeaders(),
+        ...(options.headers || {}),
+      },
+    });
+    if (!res.ok) {
+     
+      const { errors } = await res.json();
+      throw new Error(errors ? errors[0] : 'Unknown error');
+    }
+    return await res.json();
+  } catch (err) {
+    throw err;
   }
-  return body.data;
 }
 
-export async function fetchSocial(path, opts = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...opts,
-    headers: socialHeaders()
-  });
-
-  // handle DELETE / no-content
-  if (res.status === 204 || res.status === 205) {
-    if (!res.ok) throw new Error(res.statusText);
-    return;
+export async function fetchSocial(endpoint, options = {}) {
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers: {
+        ...socialHeaders(),
+        ...(options.headers || {}),
+      },
+    });
+    if (!res.ok) {
+     
+      const { errors } = await res.json();
+      throw new Error(errors ? errors[0] : 'Unknown error');
+    }
+    return await res.json();
+  } catch (err) {
+    throw err;
   }
-
-  const body = await res.json();
-  if (!res.ok) {
-    throw new Error(
-      (body.errors || []).map(e => e.message).join(', ') || res.statusText
-    );
-  }
-  return body.data;
 }
 
-// — Search profiles by **partial** name
-export async function searchProfiles(name, page = 1) {
-  return fetchSocial(
-    `/social/profiles?name=${encodeURIComponent(name)}&page=${page}`
-  );
-}
 
-// — Wrapper to follow a user
-export async function followUser(userId) {
-  return fetchSocial(`/social/profiles/${userId}/follow`, {
-    method: 'POST',
-    body: JSON.stringify({})
-  });
-}
-
-// — Wrapper to unfollow a user
-export async function unfollowUser(userId) {
-  return fetchSocial(`/social/profiles/${userId}/follow`, {
-    method: 'DELETE',
-    body: JSON.stringify({})
-  });
-}
-
-// — Fetch a user’s own posts
-export async function getUserPosts(userId) {
-  return fetchSocial(`/social/profiles/${userId}/posts`);
-}
 
 
 /**

@@ -12,38 +12,46 @@ const tagInput            = document.getElementById('tagInput');
 const tagBtn              = document.getElementById('tagBtn');
 const toastElem           = document.getElementById('toast');
 
-const me         = localStorage.getItem('username') || 'me';
+const loggedInUser = localStorage.getItem('username');
+//console.log('Debug: Logged in user is', loggedInUser);
+
 let myUserId;
 let followingSet = new Set();
 
 const EMOJI_LIST = ['🐱', '😻', '❤️', '😂', '👍', '😮'];
 
-// Load who you follow (by username)
+// Guard: Check login, else redirect to login.html
+if (!loggedInUser) {
+  alert('You are not logged in. Redirecting to login.');
+  window.location.href = 'index.html';
+  throw new Error('No user in localStorage. Login required.');
+}
+
 async function loadFollowing() {
   try {
-    const profile = await fetchSocial(`/social/profiles/${me}?_following=true`);
-    // Use .data.following, fallback to empty array
+    const profile = await fetchSocial(`/social/profiles/${loggedInUser}?_following=true`);
     const followingArr = profile.data?.following || [];
     followingSet = new Set(followingArr.map(u => u.name));
-    followingSet.add(me); // Always include self
+    followingSet.add(loggedInUser);
     localStorage.setItem('followingSet', JSON.stringify([...followingSet]));
+    //console.log('Following set after load:', followingSet);
   } catch (err) {
-    followingSet = new Set([me]);
-    console.error('Error loading following:', err);
+    followingSet = new Set([loggedInUser]);
+    //console.log('Error loading following:', err);
   }
 }
 
-// Load current user info
 async function loadCurrentUser() {
   try {
-    const profile = await fetchSocial(`/social/profiles/${me}`);
+    const profile = await fetchSocial(`/social/profiles/${loggedInUser}`);
     const d = profile.data || {};
     myUserId = d.id;
     currentUserAvatar.src = d.avatar?.url || '/catinbox.png';
     currentUserAvatar.alt = d.avatar?.alt || 'Avatar';
-    currentUserNameElem.textContent = d.name || me;
+    currentUserNameElem.textContent = d.name || loggedInUser;
   } catch (err) {
-    currentUserNameElem.textContent = me;
+    currentUserNameElem.textContent = loggedInUser;
+    //console.log('Could not load user profile', err);
   }
 }
 
@@ -60,12 +68,10 @@ function showToast(message, color = '#A8E0FF') {
   }, 1800);
 }
 
-// Filtering & Sorting events
 if (filterSearch) filterSearch.addEventListener('input', () => loadFeed());
 if (sortSelect)   sortSelect.addEventListener('change', () => loadFeed());
 if (tagBtn)       tagBtn.addEventListener('click', e => { e.preventDefault(); loadFeed(); });
 
-// New post handler
 if (postForm) {
   postForm.addEventListener('submit', async e => {
     e.preventDefault();
@@ -94,19 +100,15 @@ if (postForm) {
   });
 }
 
-// Main Load Feed: posts from following + yourself
 async function loadFeed() {
   try {
     let url = '/social/posts?_author=true&_reactions=true&_comments=true&sort=created&sortOrder=desc';
     let postsResponse = await fetchSocial(url);
 
-    // Fix: use .data property if exists
     let posts = Array.isArray(postsResponse.data) ? postsResponse.data : postsResponse;
 
-    // Only posts from following + yourself
     posts = posts.filter(post => followingSet.has(post.author?.name));
 
-    // Filter by search text in title/body
     const searchText = filterSearch?.value.trim().toLowerCase() || '';
     if (searchText) {
       posts = posts.filter(post =>
@@ -114,7 +116,6 @@ async function loadFeed() {
         post.body?.toLowerCase().includes(searchText)
       );
     }
-    // Filter by tag
     const tag = tagInput?.value.trim().toLowerCase() || '';
     if (tag) {
       posts = posts.filter(post =>
@@ -122,7 +123,6 @@ async function loadFeed() {
       );
     }
 
-    // Client-side sort
     const sort = sortSelect?.value || 'created:desc';
     let [sortField, sortDir] = sort.split(':');
     if (sortField === 'title') {
@@ -137,14 +137,14 @@ async function loadFeed() {
       });
     } else if (sortField === 'created' && sortDir === 'asc') {
       posts = posts.sort((a, b) => new Date(a.created) - new Date(b.created));
-    } 
+    }
+    //console.log('Posts rendered in feed:', posts.length);
     renderFeed(posts);
   } catch (err) {
     feedContainer.innerHTML = '<div class="text-red-500">Failed to load feed.</div>';
   }
 }
 
-// Render Feed with Emoji, Edit, Delete, and Comment
 function renderFeed(posts) {
   if (!posts.length) {
     feedContainer.innerHTML = '<div class="text-gray-500">No posts found.</div>';
@@ -154,7 +154,6 @@ function renderFeed(posts) {
   addFeedEvents(posts);
 }
 
-// Render post with reactions, comment form, edit/delete for own posts
 function renderPost(post) {
   const emojiBtns = EMOJI_LIST.map(emoji => {
     const reactionObj = (post.reactions || []).find(r => r.symbol === emoji);
@@ -165,7 +164,7 @@ function renderPost(post) {
       </button>
     `;
   }).join('');
-  const isMine = post.author?.name === me;
+  const isMine = (post.author?.name || '').toLowerCase() === loggedInUser.toLowerCase();
   const controls = isMine
     ? `
       <button class="edit-btn text-[#5A3E28] hover:text-[#F9D774] mr-2" data-post="${post.id}">Edit</button>
@@ -192,7 +191,6 @@ function renderPost(post) {
   return `
     <div class="bg-white p-6 rounded-lg shadow-md group relative post-card cursor-pointer hover:bg-[#A8E0FF]/20 transition"
          data-id="${post.id}">
-      <div class="absolute inset-0 z-10"></div>
       <div class="flex items-center space-x-3 mb-2">
         <img src="${post.author?.avatar?.url || '/catinbox.png'}" alt="avatar" class="w-8 h-8 rounded-full"/>
         <span class="font-semibold text-[#5A3E28]">${post.author?.name || 'User'}</span>
@@ -212,14 +210,13 @@ function renderPost(post) {
 
 function addFeedEvents(posts) {
   document.querySelectorAll('.post-card').forEach(card => {
+
     card.addEventListener('click', function (e) {
+      const tag = e.target.tagName;
       if (
         e.target.closest('form') ||
         e.target.closest('button') ||
-        e.target.tagName === 'BUTTON' ||
-        e.target.classList.contains('emoji-btn') ||
-        e.target.classList.contains('edit-btn') ||
-        e.target.classList.contains('delete-btn')
+        ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'LABEL', 'A'].includes(tag)
       ) return;
       const postId = card.getAttribute('data-id');
       if (postId) {
@@ -229,7 +226,8 @@ function addFeedEvents(posts) {
   });
 
   document.querySelectorAll('.emoji-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
       const postId = btn.dataset.post;
       const emoji  = btn.dataset.emoji;
       try {
@@ -243,28 +241,35 @@ function addFeedEvents(posts) {
       }
     });
   });
+
   document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
       const postId = btn.dataset.post;
       if (!confirm('Delete this post?')) return;
       try {
         await fetchSocial(`/social/posts/${postId}`, { method: 'DELETE' });
         await loadFeed();
+        //console.log('Post deleted:', postId);
       } catch (err) {
         alert('Failed to delete post');
       }
     });
   });
+
   document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const postId = btn.dataset.post;
       const post = posts.find(p => `${p.id}` === postId);
       startEditPost(post);
     });
   });
+
   document.querySelectorAll('.comment-form').forEach(form => {
     form.addEventListener('submit', async e => {
       e.preventDefault();
+      e.stopPropagation();
       const postId = form.dataset.post;
       const input = form.querySelector('input[name="comment"]');
       const body = input.value.trim();
@@ -276,6 +281,7 @@ function addFeedEvents(posts) {
         });
         input.value = '';
         await loadFeed();
+        //console.log('Comment added to post:', postId, 'body:', body);
       } catch (err) {
         alert('Failed to add comment');
       }
@@ -330,6 +336,7 @@ function startEditPost(post) {
   postDiv.appendChild(form);
   form.addEventListener('submit', async e => {
     e.preventDefault();
+    e.stopPropagation();
     const updated = {
       title: titleInput.value.trim(),
       body: bodyInput.value.trim(),
@@ -352,7 +359,6 @@ function startEditPost(post) {
   });
 }
 
-// Initial Load
 (async function() {
   await loadCurrentUser();
   await loadFollowing();

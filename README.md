@@ -55,13 +55,13 @@ FuzzyGallery is an animal-themed social media web app, letting users share, comm
 
 ## Process & Peer Review
 - Trello board: https://trello.com/b/cDfzrYFT/js2-ca-2025
-
+- I have feedback on Moodle under peer feedback: https://lms.noroff.no/mod/forum/discuss.php?d=86399
 
 ## Credits
 
 - All images: [Unsplash.com](https://unsplash.com)
 - Cat logo & footer illustrations: AI generated
-- Chat gtp has helped me with debugging, examples for post texts and overall been my friend. 
+- Chat gtp has helped me with some debugging, examples for post texts and overall been my friend. 
 
 - Special thank you to my teacher: Martin Krüger - thank you for answering all my questions!
 

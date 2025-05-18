@@ -72,5 +72,3 @@ FuzzyGallery is an animal-themed social media web app, letting users share, comm
 
 JSdocs function: The api.js has been documented. 
 
-![computer](https://github.com/user-attachments/assets/937cf3f1-f8be-49f4-956b-8360a122895d)
-

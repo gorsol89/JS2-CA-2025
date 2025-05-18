@@ -22,7 +22,9 @@ const EMOJI_LIST = ['🐱', '😻', '❤️', '😂', '👍', '😮'];
 async function loadFollowing() {
   try {
     const profile = await fetchSocial(`/social/profiles/${me}?_following=true`);
-    followingSet = new Set((profile.following || []).map(u => u.name));
+    // Use .data.following, fallback to empty array
+    const followingArr = profile.data?.following || [];
+    followingSet = new Set(followingArr.map(u => u.name));
     followingSet.add(me); // Always include self
     localStorage.setItem('followingSet', JSON.stringify([...followingSet]));
   } catch (err) {
@@ -35,10 +37,11 @@ async function loadFollowing() {
 async function loadCurrentUser() {
   try {
     const profile = await fetchSocial(`/social/profiles/${me}`);
-    myUserId = profile.id;
-    currentUserAvatar.src = profile.avatar?.url || '/catinbox.png';
-    currentUserAvatar.alt = profile.avatar?.alt || 'Avatar';
-    currentUserNameElem.textContent = profile.name || me;
+    const d = profile.data || {};
+    myUserId = d.id;
+    currentUserAvatar.src = d.avatar?.url || '/catinbox.png';
+    currentUserAvatar.alt = d.avatar?.alt || 'Avatar';
+    currentUserNameElem.textContent = d.name || me;
   } catch (err) {
     currentUserNameElem.textContent = me;
   }
@@ -94,9 +97,11 @@ if (postForm) {
 // Main Load Feed: posts from following + yourself
 async function loadFeed() {
   try {
-    // Always use the server sort for 'created:desc', fallback for others
     let url = '/social/posts?_author=true&_reactions=true&_comments=true&sort=created&sortOrder=desc';
-    let posts = await fetchSocial(url);
+    let postsResponse = await fetchSocial(url);
+
+    // Fix: use .data property if exists
+    let posts = Array.isArray(postsResponse.data) ? postsResponse.data : postsResponse;
 
     // Only posts from following + yourself
     posts = posts.filter(post => followingSet.has(post.author?.name));
@@ -131,7 +136,6 @@ async function loadFeed() {
         }
       });
     } else if (sortField === 'created' && sortDir === 'asc') {
-      // Oldest first: sort by date client-side (since API is desc only)
       posts = posts.sort((a, b) => new Date(a.created) - new Date(b.created));
     } // If desc: already sorted by API
 
@@ -186,7 +190,6 @@ function renderPost(post) {
       </button>
     </form>
   `;
-  // Outer clickable wrapper, except buttons/forms
   return `
     <div class="bg-white p-6 rounded-lg shadow-md group relative post-card cursor-pointer hover:bg-[#A8E0FF]/20 transition"
          data-id="${post.id}">
@@ -208,13 +211,9 @@ function renderPost(post) {
   `;
 }
 
-// Events for reactions, edit, delete, comment, and post click
 function addFeedEvents(posts) {
-  // Handle click to post detail
   document.querySelectorAll('.post-card').forEach(card => {
-    // Only navigate if NOT clicking on a button or inside a form
     card.addEventListener('click', function (e) {
-      // Prevent if clicking inside comment form, edit, delete, emoji etc.
       if (
         e.target.closest('form') ||
         e.target.closest('button') ||
@@ -285,7 +284,6 @@ function addFeedEvents(posts) {
   });
 }
 
-// Inline Edit
 function startEditPost(post) {
   const postDiv = document.querySelector(`[data-id="${post.id}"]`);
   if (!postDiv) return;

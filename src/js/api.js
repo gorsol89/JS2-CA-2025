@@ -1,19 +1,27 @@
 // src/js/api.js
 
-// Noroff API base url - don't forget to set .env or stuff breaks!
+// Debug: show env on load
+console.log("VITE_API_BASE:", import.meta.env.VITE_API_BASE);
+console.log("VITE_NOROFF_API_KEY:", import.meta.env.VITE_NOROFF_API_KEY);
+console.log("VITE_BEARER_TOKEN:", import.meta.env.VITE_BEARER_TOKEN);
+
 export const API_BASE = import.meta.env.VITE_API_BASE;
-const DEFAULT_API_KEY = import.meta.env.VITE_NOROFF_API_KEY; 
+const DEFAULT_API_KEY = import.meta.env.VITE_NOROFF_API_KEY;
 
 function authHeaders() {
-  // Standard headers for /auth endpoints
   return { 'Content-Type': 'application/json' };
 }
 
 function socialHeaders() {
-  // Not sure if apiKey is always in localStorage, fallback to default
+  let apiKey = localStorage.getItem('apiKey');
+  if (!apiKey || apiKey === "undefined" || apiKey === "") {
+    apiKey = DEFAULT_API_KEY;
+  }
   const token  = localStorage.getItem('accessToken') || import.meta.env.VITE_BEARER_TOKEN;
-  const apiKey = localStorage.getItem('apiKey') || DEFAULT_API_KEY;
-  // console.log('Using API key:', apiKey); // Debug line for testing
+  console.log("Sending headers: ", {
+    'Authorization': `Bearer ${token}`,
+    'X-Noroff-API-Key': apiKey
+  });
   return {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
@@ -41,6 +49,7 @@ export async function fetchAuth(endpoint, options = {}) {
 }
 
 export async function fetchSocial(endpoint, options = {}) {
+  console.log("fetchSocial called:", endpoint, options);
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {
       ...options,

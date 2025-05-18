@@ -1,5 +1,3 @@
-// Auth stuff for login/register 
-
 import { fetchAuth, fetchSocial } from './api.js';
 
 const registerForm = document.getElementById('registerForm');
@@ -11,7 +9,6 @@ if (registerForm) {
     e.preventDefault();
     const { name, email, password, bio, avatar, banner } = e.target.elements;
     try {
-      // Register new user
       const user = await fetchAuth('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
@@ -27,23 +24,21 @@ if (registerForm) {
             : undefined,
         }),
       });
-      // Save username after registering (if returned)
-      if (user && user.name) {
-        localStorage.setItem('username', user.name);
+      console.log("Register response:", user);
+      // Try to save both possible return formats:
+      if (user && (user.name || (user.data && user.data.name))) {
+        localStorage.setItem('username', user.name || user.data?.name);
       }
       window.location.href = 'profile.html';
     } catch (err) {
       alert('Registrering feilet. Prøv igjen!');
-      //console.error('Register error:', err);
     }
   });
 }
 
-// -- Login --
 if (loginForm) {
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();
-    // Quick note: if this breaks, check field names!
     const { email, password } = e.target.elements;
     try {
       const data = await fetchAuth('/auth/login', {
@@ -53,20 +48,25 @@ if (loginForm) {
           password: password.value,
         }),
       });
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('apiKey', data.apiKey); 
-      // Save username after login
-      if (data && data.name) {
-        localStorage.setItem('username', data.name);
-      }
+      // Debug log: what do we get back from the API?
+      console.log("Login response:", data);
+      console.log("accessToken from login:", data.accessToken, data?.data?.accessToken);
+      console.log("name from login:", data.name, data?.data?.name);
+
+      // Try both flat and nested return objects:
+      const accessToken = data.accessToken || data?.data?.accessToken;
+      const username    = data.name        || data?.data?.name;
+
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('username', username);
+
+      // Debug: confirm what is in localStorage
+      console.log("Saved accessToken:", localStorage.getItem('accessToken'));
+      console.log("Saved username:", localStorage.getItem('username'));
+
       window.location.href = 'profile.html';
     } catch (err) {
       alert('Innlogging feilet. Prøv igjen!');
-      //console.error('Login error:', err);
     }
   });
 }
-console.log("Login data from API:", data);
-console.log("Saved accessToken:", localStorage.getItem('accessToken'));
-console.log("Saved username:", localStorage.getItem('username'));
-console.log("Saved apiKey:", localStorage.getItem('apiKey'));

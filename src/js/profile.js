@@ -15,9 +15,9 @@ function getId(obj) {
 
 async function loadProfile() {
   try {
-    console.log("Current username:", me);
+    //console.log("Current username:", me);
     profileData = await fetchSocial(`/social/profiles/${me}?_followers=true&_following=true`);
-    console.log("Profile API response:", profileData);
+    //console.log("Profile API response:", profileData);
     if (profileData.errors) {
       infoSec.textContent = 'Profile error: ' + profileData.errors.join(', ');
       return;
@@ -40,7 +40,7 @@ async function loadProfile() {
     }
   } catch (err) {
     infoSec.textContent = 'Error loading profile: ' + (err.message || JSON.stringify(err));
-    console.error("Profile load error:", err);
+    //console.error("Profile load error:", err);
   }
 }
 

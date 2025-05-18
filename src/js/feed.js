@@ -137,8 +137,7 @@ async function loadFeed() {
       });
     } else if (sortField === 'created' && sortDir === 'asc') {
       posts = posts.sort((a, b) => new Date(a.created) - new Date(b.created));
-    } // If desc: already sorted by API
-
+    } 
     renderFeed(posts);
   } catch (err) {
     feedContainer.innerHTML = '<div class="text-red-500">Failed to load feed.</div>';

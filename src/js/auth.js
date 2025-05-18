@@ -24,8 +24,7 @@ if (registerForm) {
             : undefined,
         }),
       });
-      console.log("Register response:", user);
-      // Try to save both possible return formats:
+      //console.log("Register response:", user);
       if (user && (user.name || (user.data && user.data.name))) {
         localStorage.setItem('username', user.name || user.data?.name);
       }
@@ -49,9 +48,9 @@ if (loginForm) {
         }),
       });
       // Debug log: what do we get back from the API?
-      console.log("Login response:", data);
-      console.log("accessToken from login:", data.accessToken, data?.data?.accessToken);
-      console.log("name from login:", data.name, data?.data?.name);
+      //console.log("Login response:", data);
+      //console.log("accessToken from login:", data.accessToken, data?.data?.accessToken);
+      //console.log("name from login:", data.name, data?.data?.name);
 
       // Try both flat and nested return objects:
       const accessToken = data.accessToken || data?.data?.accessToken;
@@ -61,8 +60,8 @@ if (loginForm) {
       localStorage.setItem('username', username);
 
       // Debug: confirm what is in localStorage
-      console.log("Saved accessToken:", localStorage.getItem('accessToken'));
-      console.log("Saved username:", localStorage.getItem('username'));
+      //console.log("Saved accessToken:", localStorage.getItem('accessToken'));
+      //console.log("Saved username:", localStorage.getItem('username'));
 
       window.location.href = 'profile.html';
     } catch (err) {

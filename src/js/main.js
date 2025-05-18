@@ -1,6 +1,6 @@
 // src/js/main.js
 import '../style.css';
-console.log('✅ FuzzyGallery loaded');
+//console.log('✅ FuzzyGallery loaded');
 
 // — Redirect if not logged in and not on public pages:
 const publicPages = ['index.html', 'register.html'];

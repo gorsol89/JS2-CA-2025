@@ -1,9 +1,7 @@
-// src/js/api.js
-
 // Debug: show env on load
-console.log("VITE_API_BASE:", import.meta.env.VITE_API_BASE);
-console.log("VITE_NOROFF_API_KEY:", import.meta.env.VITE_NOROFF_API_KEY);
-console.log("VITE_BEARER_TOKEN:", import.meta.env.VITE_BEARER_TOKEN);
+//console.log("VITE_API_BASE:", import.meta.env.VITE_API_BASE);
+//console.log("VITE_NOROFF_API_KEY:", import.meta.env.VITE_NOROFF_API_KEY);
+//console.log("VITE_BEARER_TOKEN:", import.meta.env.VITE_BEARER_TOKEN);
 
 export const API_BASE = import.meta.env.VITE_API_BASE;
 const DEFAULT_API_KEY = import.meta.env.VITE_NOROFF_API_KEY;
@@ -18,7 +16,7 @@ function socialHeaders() {
     apiKey = DEFAULT_API_KEY;
   }
   const token  = localStorage.getItem('accessToken') || import.meta.env.VITE_BEARER_TOKEN;
-  console.log("Sending headers: ", {
+  //console.log("Sending headers: ", {
     'Authorization': `Bearer ${token}`,
     'X-Noroff-API-Key': apiKey
   });
@@ -49,7 +47,7 @@ export async function fetchAuth(endpoint, options = {}) {
 }
 
 export async function fetchSocial(endpoint, options = {}) {
-  console.log("fetchSocial called:", endpoint, options);
+  //console.log("fetchSocial called:", endpoint, options);
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {
       ...options,

@@ -60,6 +60,10 @@ FuzzyGallery is an animal-themed social media web app, letting users share, comm
 ## Process & Peer Review
 - Trello board: https://trello.com/b/cDfzrYFT/js2-ca-2025
 - I have feedback on Moodle under peer feedback: https://lms.noroff.no/mod/forum/discuss.php?d=86399
+- PR:
+
+![Skjermbilde 2025-05-18 123516](https://github.com/user-attachments/assets/92dda268-933b-444c-87c8-f0eedfe4fc4c)
+
 
 ## Credits
 

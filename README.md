@@ -2,6 +2,10 @@
 
 # FuzzyGallery – Noroff JS2 CA
 
+![logo](https://github.com/user-attachments/assets/07674641-47e9-4bea-a92d-96aa32c9e067)
+
+
+
 Welcome to my course assignment for JavaScript 2 at Noroff!  
 FuzzyGallery is an animal-themed social media web app, letting users share, comment, and react to their favorite animal photos.
 
@@ -67,3 +71,4 @@ FuzzyGallery is an animal-themed social media web app, letting users share, comm
 
 
 JSdocs function: The api.js has been documented. 
+

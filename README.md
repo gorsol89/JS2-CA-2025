@@ -3,7 +3,7 @@
 # FuzzyGallery – Noroff JS2 CA
 
 Welcome to my course assignment for JavaScript 2 at Noroff!  
-**FuzzyGallery** is an animal-themed social media web app, letting users share, comment, and react to their favorite animal photos.
+FuzzyGallery is an animal-themed social media web app, letting users share, comment, and react to their favorite animal photos.
 
 
 ## Live Demo
@@ -24,12 +24,13 @@ Welcome to my course assignment for JavaScript 2 at Noroff!
 - Comment and react with emojis
 - See profile
 
+(- Follow/unfollow/serach for users by username, I tried hard to get this, but did not sucessfully make it, therefore there is some left in the code regarding this)
 
 ## Tech Stack
 
-- JavaScript (modules, async/await)
-- Tailwind CSS (styling)
-- Vite (build tool)
+- JavaScript 
+- Tailwind CSS 
+- Vite 
 - Noroff Social API
 
 
@@ -60,7 +61,7 @@ Welcome to my course assignment for JavaScript 2 at Noroff!
 
 - All images: [Unsplash.com](https://unsplash.com)
 - Cat logo & footer illustrations: AI generated
-- Noroff Social API: [docs](https://docs.noroff.dev/social-endpoints/)
+- Chat gtp has helped me with debugging, examples for post texts and overall been my friend. 
 
 - Special thank you to my teacher: Martin Krüger - thank you for answering all my questions!
 

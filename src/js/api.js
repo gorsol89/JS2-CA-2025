@@ -31,7 +31,6 @@ export async function fetchAuth(endpoint, options = {}) {
       },
     });
     if (!res.ok) {
-     
       const { errors } = await res.json();
       throw new Error(errors ? errors[0] : 'Unknown error');
     }
@@ -51,7 +50,6 @@ export async function fetchSocial(endpoint, options = {}) {
       },
     });
     if (!res.ok) {
-     
       const { errors } = await res.json();
       throw new Error(errors ? errors[0] : 'Unknown error');
     }
@@ -60,9 +58,6 @@ export async function fetchSocial(endpoint, options = {}) {
     throw err;
   }
 }
-
-
-
 
 /**
 
@@ -146,4 +141,3 @@ JS DOCS for the api.js
  * @returns {Promise<Object[]>} Array of post objects.
  * @throws {Error} On API/network errors.
  */
-

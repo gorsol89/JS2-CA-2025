@@ -1,13 +1,10 @@
 // Auth stuff for login/register 
 
-
 import { fetchAuth, fetchSocial } from './api.js';
 
 const registerForm = document.getElementById('registerForm');
 const loginForm = document.getElementById('loginForm');
 const overlay = document.getElementById('loadingOverlay');
-
-
 
 if (registerForm) {
   registerForm.addEventListener('submit', async e => {
@@ -15,7 +12,6 @@ if (registerForm) {
     const { name, email, password, bio, avatar, banner } = e.target.elements;
     try {
       // Register new user
-    
       const user = await fetchAuth('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
@@ -31,7 +27,10 @@ if (registerForm) {
             : undefined,
         }),
       });
-      
+      // Save username after registering (if returned)
+      if (user && user.name) {
+        localStorage.setItem('username', user.name);
+      }
       window.location.href = 'profile.html';
     } catch (err) {
       alert('Registrering feilet. Prøv igjen!');
@@ -56,7 +55,10 @@ if (loginForm) {
       });
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('apiKey', data.apiKey); 
-      
+      // Save username after login
+      if (data && data.name) {
+        localStorage.setItem('username', data.name);
+      }
       window.location.href = 'profile.html';
     } catch (err) {
       alert('Innlogging feilet. Prøv igjen!');
@@ -64,4 +66,7 @@ if (loginForm) {
     }
   });
 }
-
+console.log("Login data from API:", data);
+console.log("Saved accessToken:", localStorage.getItem('accessToken'));
+console.log("Saved username:", localStorage.getItem('username'));
+console.log("Saved apiKey:", localStorage.getItem('apiKey'));

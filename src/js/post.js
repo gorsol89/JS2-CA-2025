@@ -11,7 +11,11 @@ if (!postId) {
 }
 
 fetchSocial(`/social/posts/${postId}?_author=true&_comments=true&_reactions=true`)
-  .then(renderPost)
+  .then(res => {
+    // FIX: use .data property if present
+    const post = res.data || res;
+    renderPost(post);
+  })
   .catch(err => {
     container.innerHTML = `<p class="text-red-600">Error loading post: ${err.message}</p>`;
     console.error(err);
@@ -31,9 +35,11 @@ function renderPost(post) {
   const commentsHTML = Array.isArray(comments) && comments.length
     ? comments.map(c => {
         const d = new Date(c.created).toLocaleString();
+        // Defensive: Show c.owner as name if possible, else fallback
+        const ownerName = c.owner?.name || c.owner || 'User';
         return `
           <div class="border p-4 rounded mb-4">
-            <p class="text-sm text-gray-600"><strong>${c.owner.name}</strong> on ${d}</p>
+            <p class="text-sm text-gray-600"><strong>${ownerName}</strong> on ${d}</p>
             <p>${c.body}</p>
           </div>`;
       }).join('')
@@ -42,7 +48,7 @@ function renderPost(post) {
   container.innerHTML = `
     <article class="prose mx-auto">
       <h1 class="text-3xl font-bold">${title}</h1>
-      <p class="text-sm text-gray-600">by ${author.name} on ${date}</p>
+      <p class="text-sm text-gray-600">by ${author?.name || 'User'} on ${date}</p>
       ${media ? `<img src="${media.url}" alt="${media.alt||'Post image'}" class="w-full my-4 rounded" />` : ''}
       <div class="mt-4">${body}</div>
       ${tagsHTML}

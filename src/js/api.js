@@ -16,10 +16,11 @@ function socialHeaders() {
     apiKey = DEFAULT_API_KEY;
   }
   const token  = localStorage.getItem('accessToken') || import.meta.env.VITE_BEARER_TOKEN;
-  //console.log("Sending headers: ", {
-    'Authorization': `Bearer ${token}`,
-    'X-Noroff-API-Key': apiKey
-  });
+  // Optionally, log the headers if debugging
+  // console.log("Sending headers: ", {
+  //   'Authorization': `Bearer ${token}`,
+  //   'X-Noroff-API-Key': apiKey
+  // });
   return {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
@@ -66,7 +67,7 @@ export async function fetchSocial(endpoint, options = {}) {
   }
 }
 
-/**
+/*
 
 JS DOCS for the api.js
 /**
